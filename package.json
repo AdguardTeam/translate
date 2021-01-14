@@ -6,8 +6,16 @@
   "types": "dist/types/index.d.ts",
   "author": "Adguard Software Ltd",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdguardTeam/translate.git"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "rollup -c",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "lint": "eslint src tests",
     "docs": "typedoc --out docs src"

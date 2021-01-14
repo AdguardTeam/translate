@@ -302,7 +302,7 @@ To build documentation, run the following command in the terminal:
 yarn docs
 ```
 
-### <a id="todo"</a> TODO
+### <a id="todo"></a> TODO
 
 - [ ] Create Vue plugin
 - [ ] Add utility to check if code contains unused or redundant translation messages
