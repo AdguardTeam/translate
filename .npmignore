@@ -1,0 +1,11 @@
+coverage
+src
+docs
+tests
+jest.config.ts
+tsconfig.json
+rollup.config.js
+babel.config.js
+.eslintignore
+.idea
+.eslintrc.js
