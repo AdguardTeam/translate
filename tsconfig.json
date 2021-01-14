@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "target": "es5",
+    "module": "es2015",
+    "allowJs": true,
+    "strict": true,
+    "outDir": "dist",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+  },
+}
