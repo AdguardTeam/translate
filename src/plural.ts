@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 enum AvailableLocales {
     az = 'az',
     bo = 'bo',

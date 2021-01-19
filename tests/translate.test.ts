@@ -1,4 +1,4 @@
-import React from '../src/plugins/node_modules/react';
+import React from 'react';
 
 import { translate } from '../src/translate';
 import { Locales } from "../src/plural";
@@ -21,6 +21,14 @@ describe('translate', () => {
                 },
 
                 getUILanguage(): Locales {
+                    return 'en';
+                },
+
+                getBaseMessage(key: string): string {
+                    return messages[key];
+                },
+
+                getBaseUILanguage(): Locales {
                     return 'en';
                 }
             }
@@ -55,6 +63,14 @@ describe('translate', () => {
                 },
 
                 getUILanguage(): Locales {
+                    return 'en';
+                },
+
+                getBaseMessage(key: string): string {
+                    return messages[key];
+                },
+
+                getBaseUILanguage(): Locales {
                     return 'en';
                 }
             }
