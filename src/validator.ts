@@ -1,6 +1,6 @@
 import { parser } from './parser';
 import { isTextNode, Node } from './nodes';
-import { isPluralFormValid } from "./plural";
+import { isPluralFormValid } from './plural';
 
 /**
  * Compares two AST (abstract syntax tree) structures,
@@ -59,4 +59,4 @@ export const isTranslationValid = (baseMessage: string, translatedMessage: strin
 export const validator = {
     isTranslationValid,
     isPluralFormValid,
-}
+};

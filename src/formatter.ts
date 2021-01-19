@@ -145,7 +145,7 @@ export const formatter = (message?: string, values?: ValuesAny): string[] => {
 
     // convert values to strings if not a function
     if (values) {
-        Object.keys(values).forEach(key => {
+        Object.keys(values).forEach((key) => {
             const value = values[key];
             // TODO consider using strong typing
             if (typeof value === 'function') {
@@ -153,7 +153,7 @@ export const formatter = (message?: string, values?: ValuesAny): string[] => {
             } else {
                 preparedValues[key] = String(value);
             }
-        })
+        });
     }
 
     return format(ast, preparedValues);

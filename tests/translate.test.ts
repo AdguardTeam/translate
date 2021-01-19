@@ -1,4 +1,4 @@
-import React from 'react';
+import React from '../src/plugins/node_modules/react';
 
 import { translate } from '../src/translate';
 import { Locales } from "../src/plural";

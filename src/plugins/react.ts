@@ -1,20 +1,8 @@
-import { I18nInterface, Translator } from "../Translator";
 import type React from 'react';
-
-interface ValueReactFunc {
-    (children: React.ReactChildren): React.ReactChildren
-}
-
-interface ValuesReact {
-    [key: string]: ValueReactFunc | React.ReactChildren,
-}
-
-interface createElement {
-    (type: string, props?: React.Attributes | null, ...children: React.ReactNode[]): React.ReactChildren
-}
+import { I18nInterface, Translator } from '../Translator';
 
 export interface ReactCustom {
-    createElement: createElement
+    createElement: typeof React.createElement
     Children: React.ReactChildren
 }
 
@@ -51,7 +39,9 @@ export interface ReactCustom {
  * @param i18n - object with methods which get translated message by key and return current locale
  * @param React - instance of react library
  */
-export const createReactTranslator = (i18n: I18nInterface, React: ReactCustom): Translator => {
+export const createReactTranslator = <T = React.ReactNode>(
+    i18n: I18nInterface, react: ReactCustom,
+): Translator<T> => {
     /**
      * Helps to build nodes without values
      *
@@ -60,25 +50,25 @@ export const createReactTranslator = (i18n: I18nInterface, React: ReactCustom): 
      */
     const createReactElement = (tagName: string, children: React.ReactChildren) => {
         if (children) {
-            return React.createElement(tagName, null, React.Children.toArray(children));
+            return react.createElement(tagName, null, react.Children.toArray(children));
         }
-        return React.createElement(tagName, null);
+        return react.createElement(tagName, null);
     };
 
     /**
      * Function creates default values to be used if user didn't provide function values for tags
      */
-    const createDefaultValues = (): ValuesReact => ({
-        p: (children) => createReactElement('p', children),
-        b: (children) => createReactElement('b', children),
-        strong: (children) => createReactElement('strong', children),
-        tt: (children) => createReactElement('tt', children),
-        s: (children) => createReactElement('s', children),
-        i: (children) => createReactElement('i', children),
+    const createDefaultValues = () => ({
+        p: (children: React.ReactChildren) => createReactElement('p', children),
+        b: (children: React.ReactChildren) => createReactElement('b', children),
+        strong: (children: React.ReactChildren) => createReactElement('strong', children),
+        tt: (children: React.ReactChildren) => createReactElement('tt', children),
+        s: (children: React.ReactChildren) => createReactElement('s', children),
+        i: (children: React.ReactChildren) => createReactElement('i', children),
     });
 
     const reactMessageConstructor = (formatted: string[]): React.ReactNode => {
-        const reactChildren = React.Children.toArray(formatted);
+        const reactChildren = react.Children.toArray(formatted);
 
         // if there is only strings in the array we join them
         if (reactChildren.every((child: React.ReactNode | string) => typeof child === 'string')) {
@@ -90,5 +80,5 @@ export const createReactTranslator = (i18n: I18nInterface, React: ReactCustom): 
 
     const defaultValues = createDefaultValues();
 
-    return new Translator(i18n, reactMessageConstructor, defaultValues);
+    return new Translator<T>(i18n, reactMessageConstructor, defaultValues);
 };
