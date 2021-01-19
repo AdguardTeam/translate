@@ -22,6 +22,14 @@ describe('translate', () => {
 
                 getUILanguage(): Locales {
                     return 'en';
+                },
+
+                getBaseMessage(key: string): string {
+                    return messages[key];
+                },
+
+                getBaseUILanguage(): Locales {
+                    return 'en';
                 }
             }
         })();
@@ -55,6 +63,14 @@ describe('translate', () => {
                 },
 
                 getUILanguage(): Locales {
+                    return 'en';
+                },
+
+                getBaseMessage(key: string): string {
+                    return messages[key];
+                },
+
+                getBaseUILanguage(): Locales {
                     return 'en';
                 }
             }

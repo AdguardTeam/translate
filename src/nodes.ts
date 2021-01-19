@@ -49,7 +49,7 @@ export const voidTagNode = (tagName: string): Node => {
  * Checks if target is node
  * @param target
  */
-export const isNode = (target: Node | string ): boolean => {
+export const isNode = (target: Node | string): boolean => {
     if (typeof target === 'string') {
         return false;
     }

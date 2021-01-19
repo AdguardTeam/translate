@@ -1,10 +1,10 @@
-import { formatter, ValuesAny } from "./formatter";
-import { Locales, getForm } from "./plural";
+import { formatter, ValuesAny } from './formatter';
+import { Locales, getForm } from './plural';
 
-interface TranslatorInterface {
-    getMessage(key: string, params: ValuesAny): string | unknown;
+interface TranslatorInterface<T> {
+    getMessage(key: string, params: ValuesAny): T;
 
-    getPlural(key: string, number: number, params: ValuesAny): string | unknown;
+    getPlural(key: string, number: number, params: ValuesAny): T;
 }
 
 export interface I18nInterface {
@@ -32,26 +32,30 @@ export interface I18nInterface {
     getBaseUILanguage(): Locales;
 }
 
-export interface MessageConstructorInterface {
-    (formatted: string[]): unknown;
-}
+export type MessageConstructorInterface<T> = (formatted: string[]) => T;
 
-export class Translator implements TranslatorInterface {
+const defaultMessageConstructor: MessageConstructorInterface<string> = (formatted: string[]) => {
+    return formatted.join('');
+};
+
+export class Translator<T> implements TranslatorInterface<T> {
     private i18n: I18nInterface;
-    private readonly messageConstructor: MessageConstructorInterface;
+
+    private readonly messageConstructor: MessageConstructorInterface<T>;
+
     private values: ValuesAny;
 
-    private defaultMessageConstructor = (formatted: string[]) => {
-        return formatted.join('');
-    }
-
-    constructor(i18n: I18nInterface, messageConstructor?: MessageConstructorInterface, values?: ValuesAny) {
+    constructor(
+        i18n: I18nInterface,
+        messageConstructor?: MessageConstructorInterface<any>,
+        values?: ValuesAny,
+    ) {
         this.i18n = i18n;
-        this.messageConstructor = messageConstructor || this.defaultMessageConstructor;
+        this.messageConstructor = messageConstructor || defaultMessageConstructor;
         this.values = values || {};
     }
 
-    public getMessage(key: string, params: ValuesAny = {}): string | unknown {
+    public getMessage(key: string, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
         if (!message) {
             message = this.i18n.getBaseMessage(key);
@@ -63,7 +67,7 @@ export class Translator implements TranslatorInterface {
         return this.messageConstructor(formatted);
     }
 
-    public getPlural(key: string, number: number, params: ValuesAny = {}): string | unknown {
+    public getPlural(key: string, number: number, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
         let language = this.i18n.getUILanguage();
         if (!message) {
