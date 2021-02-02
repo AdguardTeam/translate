@@ -55,6 +55,11 @@ export class Translator<T> implements TranslatorInterface<T> {
         this.values = values || {};
     }
 
+    /**
+     * Retrieves message and translates it, substituting parameters where necessary
+     * @param key - translation message key
+     * @param params - values used to substitute placeholders and tags
+     */
     public getMessage(key: string, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
         if (!message) {
@@ -67,6 +72,13 @@ export class Translator<T> implements TranslatorInterface<T> {
         return this.messageConstructor(formatted);
     }
 
+    /**
+     * Retrieves correct plural form and translates it
+     * @param key - translation message key
+     * @param number - plural form number
+     * @param params - values used to substitute placeholders or tags if necessary,
+     * if params has "count" property it will be overridden by number (plural form number)
+     */
     public getPlural(key: string, number: number, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
         let language = this.i18n.getUILanguage();
@@ -78,7 +90,7 @@ export class Translator<T> implements TranslatorInterface<T> {
             language = this.i18n.getBaseUILanguage();
         }
         const form = getForm(message, number, language, key);
-        const formatted = formatter(form, { ...this.values, ...params });
+        const formatted = formatter(form, { ...this.values, ...params, count: number });
         return this.messageConstructor(formatted);
     }
 }

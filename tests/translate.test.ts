@@ -54,7 +54,8 @@ describe('translate', () => {
         const i18n = (() => {
             const messages: MessagesInterface = {
                 simple: '<b>bold</b> in the text',
-                plural: '| %count% hour | %count% hours'
+                plural: '| %count% hour | %count% hours',
+                plural_with_placeholders: '| %count% hour %foo% | %count% hours %foo% '
             };
 
             return {
@@ -90,6 +91,22 @@ describe('translate', () => {
 
             message = translator.getPlural('plural', 2, { count: 2 });
             expect(message).toBe('2 hours');
+        });
+
+        it('translates plural strings without parameters', () => {
+            let message = translator.getPlural('plural', 1);
+            expect(message).toBe('1 hour');
+
+            message = translator.getPlural('plural', 2);
+            expect(message).toBe('2 hours');
+        });
+
+        it('translates plural number with parameters', () => {
+            let message = translator.getPlural('plural_with_placeholders', 1, { foo: 'bar' });
+            expect(message).toBe('1 hour bar');
+
+            message = translator.getPlural('plural_with_placeholders', 2, { foo: 'bar' });
+            expect(message).toBe('2 hours bar');
         });
     });
 })

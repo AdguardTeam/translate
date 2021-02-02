@@ -20,6 +20,8 @@ Simple internationalization library with React integration
     * [API](#api)
         * [createTranslator](#api-create-translator)
         * [createReactTranslator](#api-create-react-translator)
+        * [getMessage](#api-get-message)
+        * [getPlural](#api-get-plural)
         * [isTranslationValid](#api-is-translation-valid)
         * [isPluralFormValid](#api-is-plural-form-valid)
 * [Development](#development)
@@ -239,6 +241,28 @@ const createTranslator = (
  * @param React - instance of react library
  */
   const createReactTranslator = (i18n: I18nInterface, React: ReactCustom): Translator
+```
+
+#### <a id="api-get-message"></a> getMessage
+```
+/**
+ * Retrieves message and translates it, substituting parameters where necessary
+ * @param key - translation message key
+ * @param params - values used to substitute placeholders and tags
+ */
+public getMessage(key: string, params: ValuesAny = {}): T {
+```
+
+#### <a id='api-get-plural'></a> getPlural
+```
+/**
+ * Retrieves correct plural form and translates it
+ * @param key - translation message key
+ * @param number - plural form number
+ * @param params - values used to substitute placeholders or tags if necessary,
+ * if params has "count" property it will be overridden by number (plural form number)
+ */
+public getPlural(key: string, number: number, params: ValuesAny = {}): T {
 ```
 
 #### <a id="api-is-translation-valid"></a> isTranslationValid
