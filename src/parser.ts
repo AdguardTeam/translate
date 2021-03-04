@@ -206,8 +206,14 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
             // looking for the pair to the close tag
             while (!pairTagFound && stack.length > 0) {
                 const lastFromStack = stack.pop() as (Node | string);
+                // parse tag name for tags with attributes
+                // e.g. "<a href='#' class='reloadTab'>Reload page<\/a> to see the log."
+                const lastTagNameFromStack = lastFromStack
+                    .toString()
+                    .split(' ')
+                    .shift();
                 // if tag from stack equal to close tag
-                if (lastFromStack === tag) {
+                if (lastTagNameFromStack === tag) {
                     // create tag node
                     const node = tagNode(tag, children);
                     // and add it to the appropriate stack

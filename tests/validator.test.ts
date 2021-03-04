@@ -10,10 +10,16 @@ describe('validator', () => {
     });
 
     it('returns true if message has the same tag nodes count', () => {
-        const baseMessage = 'test string <a>has node</a>';
-        const targetMessage = 'тестовая строка <a>с нодой</a>';
+        let baseMessage = 'test string <a>has node</a>';
+        let targetMessage = 'тестовая строка <a>с нодой</a>';
 
-        const result = isTranslationValid(baseMessage, targetMessage);
+        let result = isTranslationValid(baseMessage, targetMessage);
+        expect(result).toBeTruthy();
+
+        baseMessage = '<a href=\'#\' class=\'reloadTab\'>Reload page</a> to see the log.';
+        targetMessage = '<a href=\'#\' class=\'reloadTab\'>Recargar pagina</a> para ver el registro.';
+
+        result = isTranslationValid(baseMessage, targetMessage);
         expect(result).toBeTruthy();
     });
 
