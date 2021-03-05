@@ -17,7 +17,7 @@ describe('validator', () => {
         expect(result).toBeTruthy();
     });
 
-    it('returns false if translation has wrong tag or tag has attributes', () => {
+    it('returns false if translation has wrong tag', () => {
         const baseMessage = 'test string <a>has node</a>';
         const targetMessage = 'тестовая строка <b>с нодой</b>';
 
