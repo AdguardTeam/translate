@@ -104,6 +104,19 @@ const createTextNodeIfPossible = (context: Context) => {
     context.text = '';
 };
 
+/**
+ * Checks if lastFromStack is the same tag and does it have any attributes
+ * @param lastFromStack
+ * @param tagToCompare
+ */
+const hasAttributes = (lastFromStack: string, tagToCompare: string) => {
+    // e.g. "a class" or "a href='#'"
+    const tagStrParts = lastFromStack.split(' ');
+    const tagName = tagStrParts[0];
+    return tagStrParts.length > 1
+        && tagName === tagToCompare;
+};
+
 interface StateHandlerFunc {
     (context: Context): STATE;
 }
@@ -206,12 +219,6 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
             // looking for the pair to the close tag
             while (!pairTagFound && stack.length > 0) {
                 const lastFromStack = stack.pop() as (Node | string);
-                // parse tag name for tags with attributes
-                // e.g. "<a href='#' class='reloadTab'>Reload page<\/a> to see the log."
-                const lastTagNameFromStack = lastFromStack
-                    .toString()
-                    .split(' ')
-                    .shift();
                 // if tag from stack equal to close tag
                 if (lastFromStack === tag) {
                     // create tag node
@@ -227,7 +234,7 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
                 } else if (isNode(lastFromStack)) {
                     // add nodes between close tag and open tag to the children
                     children.unshift(lastFromStack as Node);
-                } else if (lastTagNameFromStack === tag) {
+                } else if (typeof lastFromStack === 'string' && hasAttributes(lastFromStack, tag)) {
                     throw new Error(`Tags in string should not have attributes: ${str}`);
                 } else {
                     throw new Error(`String has unbalanced tags: ${str}`);
