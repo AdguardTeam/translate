@@ -213,7 +213,7 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
                     .split(' ')
                     .shift();
                 // if tag from stack equal to close tag
-                if (lastTagNameFromStack === tag) {
+                if (lastFromStack === tag) {
                     // create tag node
                     const node = tagNode(tag, children);
                     // and add it to the appropriate stack
@@ -227,6 +227,8 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
                 } else if (isNode(lastFromStack)) {
                     // add nodes between close tag and open tag to the children
                     children.unshift(lastFromStack as Node);
+                } else if (lastTagNameFromStack === tag) {
+                    throw new Error(`Tags in string should not have attributes: ${str}`);
                 } else {
                     throw new Error(`String has unbalanced tags: ${str}`);
                 }

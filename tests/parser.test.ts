@@ -135,6 +135,13 @@ describe('parser', () => {
         }).toThrow('String has unbalanced tags');
     });
 
+    it('throws error if tag has attributes:', () => {
+        const str = '<a href=\'#\' class=\'reloadTab\'>Reload page</a> to see the log.';
+        expect(() => {
+            parser(str);
+        }).toThrow('Tags in string should not have attributes');
+    });
+
     describe('placeholders', () => {
         it('parses placeholders in the beginning', () => {
             const str = '%replaceable% with text';
