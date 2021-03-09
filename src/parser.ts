@@ -104,6 +104,16 @@ const createTextNodeIfPossible = (context: Context) => {
     context.text = '';
 };
 
+/**
+ * Checks if lastFromStack tag has any attributes
+ * @param lastFromStack
+ */
+const hasAttributes = (lastFromStack: string) => {
+    // e.g. "a class" or "a href='#'"
+    const tagStrParts = lastFromStack.split(' ');
+    return tagStrParts.length > 1;
+};
+
 interface StateHandlerFunc {
     (context: Context): STATE;
 }
@@ -222,7 +232,11 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
                     // add nodes between close tag and open tag to the children
                     children.unshift(lastFromStack as Node);
                 } else {
-                    throw new Error(`String has unbalanced tags: ${str}`);
+                    if (typeof lastFromStack === 'string' && hasAttributes(lastFromStack)) {
+                        throw new Error(`Tags in string should not have attributes: ${str}`);
+                    } else {
+                        throw new Error(`String has unbalanced tags: ${str}`);
+                    }
                 }
                 if (stack.length === 0 && children.length > 0) {
                     throw new Error(`String has unbalanced tags: ${str}`);
