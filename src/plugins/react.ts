@@ -40,7 +40,13 @@ export interface ReactCustom {
  * @param React - instance of react library
  */
 export const createReactTranslator = <T = React.ReactNode>(
-    i18n: I18nInterface, react: ReactCustom,
+    i18n: I18nInterface, react: ReactCustom, defaults?: {
+        override?: boolean,
+        tags: {
+            key: string,
+            createdTag: string,
+        }[]
+    }
 ): Translator<T> => {
     /**
      * Helps to build nodes without values
@@ -58,14 +64,26 @@ export const createReactTranslator = <T = React.ReactNode>(
     /**
      * Function creates default values to be used if user didn't provide function values for tags
      */
-    const createDefaultValues = () => ({
-        p: (children: React.ReactChildren) => createReactElement('p', children),
-        b: (children: React.ReactChildren) => createReactElement('b', children),
-        strong: (children: React.ReactChildren) => createReactElement('strong', children),
-        tt: (children: React.ReactChildren) => createReactElement('tt', children),
-        s: (children: React.ReactChildren) => createReactElement('s', children),
-        i: (children: React.ReactChildren) => createReactElement('i', children),
-    });
+    const createDefaultValues = () => {
+        const externalDefaults: Record<string, Function> = {};
+        if (defaults) {
+            defaults.tags.forEach((t) => {
+                externalDefaults[t.key] = (children: React.ReactChildren) => createReactElement(t.createdTag, children);
+            });
+        }
+        if (defaults?.override) {
+            return externalDefaults;
+        }
+        return ({
+            p: (children: React.ReactChildren) => createReactElement('p', children),
+            b: (children: React.ReactChildren) => createReactElement('b', children),
+            strong: (children: React.ReactChildren) => createReactElement('strong', children),
+            tt: (children: React.ReactChildren) => createReactElement('tt', children),
+            s: (children: React.ReactChildren) => createReactElement('s', children),
+            i: (children: React.ReactChildren) => createReactElement('i', children),
+            ...externalDefaults
+        });
+};
 
     const reactMessageConstructor = (formatted: string[]): React.ReactNode => {
         const reactChildren = react.Children.toArray(formatted);
