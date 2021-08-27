@@ -375,7 +375,7 @@ export const parser = (str = ''): Node[] => {
     }
 
     if (stack.length > 0) {
-        throw new Error(`String has unbalanced tags ${context.str}`);
+        throw new Error(`String has unbalanced tags: ${context.str}`);
     }
 
     return result;
