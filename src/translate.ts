@@ -1,6 +1,7 @@
 import { I18nInterface, MessageConstructorInterface, Translator } from './Translator';
 import { ValuesAny } from './formatter';
 import { createReactTranslator } from './plugins/react';
+import { createPreactTranslator } from './plugins/preact';
 
 /**
  * Creates translator instance strings, by default for simple strings
@@ -19,6 +20,7 @@ const createTranslator = <T = string>(
 const translate = {
     createTranslator,
     createReactTranslator,
+    createPreactTranslator,
 };
 
 export { translate };
