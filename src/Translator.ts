@@ -56,6 +56,16 @@ export class Translator<T> implements TranslatorInterface<T> {
     }
 
     /**
+     * Returns formatted message with substituted parameters
+     * @param message
+     * @param params
+     */
+    getFormattedMessage(message: string, params: ValuesAny): T {
+        const formatted = formatter(message, { ...this.values, ...params });
+        return this.messageConstructor(formatted);
+    }
+
+    /**
      * Retrieves message and translates it, substituting parameters where necessary
      * @param key - translation message key
      * @param params - values used to substitute placeholders and tags
@@ -68,8 +78,15 @@ export class Translator<T> implements TranslatorInterface<T> {
                 throw new Error(`Was unable to find message for key: "${key}"`);
             }
         }
-        const formatted = formatter(message, { ...this.values, ...params });
-        return this.messageConstructor(formatted);
+
+        try {
+            return this.getFormattedMessage(message, params);
+        } catch (e) {
+            // if there is an error on formatting message,
+            // return formatted message for base locale
+            message = this.i18n.getBaseMessage(key);
+            return this.getFormattedMessage(message, params);
+        }
     }
 
     /**
