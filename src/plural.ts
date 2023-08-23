@@ -100,6 +100,7 @@ enum AvailableLocales {
     cy = 'cy',
     ro = 'ro',
     ar = 'ar',
+    sr_latn = 'sr_latn'
 }
 
 export type Locales = keyof typeof AvailableLocales;
@@ -210,6 +211,7 @@ const getPluralFormId = (locale: Locales, number: number): number => {
         [AvailableLocales.hr]: slavNum,
         [AvailableLocales.ru]: slavNum,
         [AvailableLocales.sr]: slavNum,
+        [AvailableLocales.sr_latn]: slavNum,
         [AvailableLocales.uk]: slavNum,
 
         [AvailableLocales.cs]: (number === 1) ? 1 : (((number >= 2) && (number <= 4)) ? 2 : 3),
@@ -365,6 +367,7 @@ const pluralFormsCount: Record<AvailableLocales, number> = {
     [AvailableLocales.hr]: 4,
     [AvailableLocales.ru]: 4,
     [AvailableLocales.sr]: 4,
+    [AvailableLocales.sr_latn]: 4,
     [AvailableLocales.uk]: 4,
     [AvailableLocales.cs]: 4,
     [AvailableLocales.sk]: 4,
