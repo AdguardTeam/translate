@@ -1,6 +1,6 @@
 {
   "name": "@adguard/translate",
-  "version": "0.3.60",
+  "version": "0.3.61",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
