@@ -18,6 +18,8 @@
     "prepublishOnly": "npm run build",
     "test": "jest",
     "lint": "eslint src tests",
+    "increment": "yarn version --patch --no-git-tag-version",
+    "build-txt": "ts-node tools/build-txt",
     "docs": "typedoc --out docs src"
   },
   "devDependencies": {
@@ -27,6 +29,7 @@
     "@babel/preset-typescript": "^7.12.7",
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
+    "@types/fs-extra": "^11.0.2",
     "@types/jest": "^26.0.19",
     "@types/react": "^17.0.38",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
@@ -35,8 +38,8 @@
     "babel-jest": "^26.6.3",
     "eslint": "^7.15.0",
     "jest": "^26.6.3",
-    "react": "^17.0.1",
     "preact": "^10.6.4",
+    "react": "^17.0.1",
     "rollup": "^2.35.1",
     "ts-node": "^9.1.1",
     "typedoc": "^0.19.2",
