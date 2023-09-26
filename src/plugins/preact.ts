@@ -65,6 +65,7 @@ export const createPreactTranslator = <T = Preact.ComponentChildren>(
      * Function creates default values to be used if user didn't provide function values for tags
      */
     const createDefaultValues = () => {
+        // eslint-disable-next-line @typescript-eslint/ban-types
         const externalDefaults: Record<string, Function> = {};
         if (defaults) {
             defaults.tags.forEach((t) => {

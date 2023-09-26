@@ -1,5 +1,5 @@
 import { formatter, ValuesAny } from './formatter';
-import { Locales, getForm } from './plural';
+import { Locale, getForm } from './plural';
 
 interface TranslatorInterface<T> {
     getMessage(key: string, params: ValuesAny): T;
@@ -16,9 +16,9 @@ export interface I18nInterface {
 
     /**
      * Returns current locale code
-     * Locale codes should be in the list of Locales
+     * Locale codes should be in the list of Locale
      */
-    getUILanguage(): Locales;
+    getUILanguage(): Locale;
 
     /**
      * Returns base locale message
@@ -29,7 +29,7 @@ export interface I18nInterface {
     /**
      * Returns base locale code
      */
-    getBaseUILanguage(): Locales;
+    getBaseUILanguage(): Locale;
 }
 
 export type MessageConstructorInterface<T> = (formatted: string[]) => T;
@@ -47,6 +47,7 @@ export class Translator<T> implements TranslatorInterface<T> {
 
     constructor(
         i18n: I18nInterface,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messageConstructor?: MessageConstructorInterface<any>,
         values?: ValuesAny,
     ) {

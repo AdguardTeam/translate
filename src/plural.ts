@@ -1,4 +1,4 @@
-enum AvailableLocales {
+export enum AvailableLocales {
     az = 'az',
     bo = 'bo',
     dz = 'dz',
@@ -103,9 +103,9 @@ enum AvailableLocales {
     sr_latn = 'sr_latn'
 }
 
-export type Locales = keyof typeof AvailableLocales;
+export type Locale = keyof typeof AvailableLocales;
 
-const getPluralFormId = (locale: Locales, number: number): number => {
+const getPluralFormId = (locale: Locale, number: number): number => {
     if (number === 0) {
         return 0;
     }
@@ -385,22 +385,62 @@ const pluralFormsCount: Record<AvailableLocales, number> = {
 
 const PLURAL_STRING_DELIMITER = '|';
 
-const checkForms = (str: string, locale: Locales, key: string): void => {
-    const forms = str.split(PLURAL_STRING_DELIMITER);
-    if (forms.length !== pluralFormsCount[locale]) {
-        throw new Error(`Invalid plural string "${key}" for locale ${locale}: ${forms.length} given; need: ${pluralFormsCount[locale]}`);
+/**
+ * Returns string plural forms which are separated by `|`.
+ *
+ * @param str Message.
+ *
+ * @returns Array of plural forms.
+ */
+export const getForms = (str: string): string[] => {
+    return str.split(PLURAL_STRING_DELIMITER);
+};
+
+/**
+ * Checks whether the string has correct number of plural forms.
+ *
+ * @param str Translated string.
+ * @param locale Locale.
+ * @param key Optional, base key.
+ *
+ * @throws Error if the number of plural forms is incorrect.
+ */
+const checkForms = (str: string, locale: Locale, key?: string): void => {
+    const givenCount = getForms(str).length;
+    const requiredCount = pluralFormsCount[locale];
+
+    if (givenCount !== requiredCount) {
+        const prefix = typeof key !== 'undefined'
+            ? `Invalid plural string "${key}" for locale '${locale}'`
+            : `Invalid plural string for locale '${locale}'`;
+        throw new Error(`${prefix}: required ${requiredCount}, given ${givenCount} in string "${str}"`);
     }
 };
 
 /**
- * Checks if plural forms are valid
- * @param str - message string
- * @param locale - message locale
- * @param key - message key, used for clearer log message
+ * Checks whether plural forms are present in base string
+ * by checking the presence of the vertical bar `|`.
+ *
+ * @param baseStr Base string.
+ *
+ * @returns True if `baseStr` contains `|`, false otherwise.
  */
-export const isPluralFormValid = (str: string, locale: Locales, key: string): boolean => {
+export const hasPluralForm = (baseStr: string): boolean => {
+    return baseStr.includes(PLURAL_STRING_DELIMITER);
+};
+
+/**
+ * Checks if plural forms are valid.
+ *
+ * @param targetStr Translated message with plural forms.
+ * @param locale Locale.
+ * @param key Optional, message key, used for clearer log message.
+ *
+ * @returns True if plural forms are valid, false otherwise.
+ */
+export const isPluralFormValid = (targetStr: string, locale: Locale, key?: string): boolean => {
     try {
-        checkForms(str, locale, key);
+        checkForms(targetStr, locale, key);
         return true;
     } catch (error) {
         return false;
@@ -414,9 +454,9 @@ export const isPluralFormValid = (str: string, locale: Locales, key: string): bo
  * @param locale - current locale
  * @param key - message key
  */
-export const getForm = (str: string, number: number, locale: Locales, key: string): string => {
+export const getForm = (str: string, number: number, locale: Locale, key: string): string => {
     checkForms(str, locale, key);
-    const forms = str.split(PLURAL_STRING_DELIMITER);
+    const forms = getForms(str);
     const currentForm = getPluralFormId(locale, number);
     return forms[currentForm].trim();
 };

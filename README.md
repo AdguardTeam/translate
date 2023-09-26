@@ -126,9 +126,9 @@ interface I18nInterface {
 
     /**
      * Returns current locale code
-     * Locale codes should be in the list of Locales
+     * Locale codes should be in the list of `Locale`s
      */
-    getUILanguage(): Locales;
+    getUILanguage(): Locale;
 
     /**
      * Returns base locale message
@@ -139,7 +139,7 @@ interface I18nInterface {
     /**
      * Returns base locale code
      */
-    getBaseUILanguage(): Locales;
+    getBaseUILanguage(): Locale;
 }
 
 // in the browser extension it will be "browser.i18n"
@@ -267,25 +267,39 @@ public getPlural(key: string, number: number, params: ValuesAny = {}): T {
 
 #### <a id="api-is-translation-valid"></a> isTranslationValid
 
-```
+```js
 /**
- * Validates translation against base string by AST (abstract syntax tree) structure
- * @param baseMessage - base message
- * @param translatedMessage - translated message
+ * Validates translation against base string by AST (abstract syntax tree) structure.
+ *
+ * @param baseMessage Base message.
+ * @param translatedMessage Translated message.
+ * @param locale Locale of `translatedMessage`.
+ *
+ * @returns True if translated message is valid, false otherwise:
+ * - if base message has no plural forms, it will return true if AST structures are same;
+ * - if base message has plural forms, first of all
+ *   the function checks if the number of plural forms is correct for the `locale`,
+ *   and then it validates AST plural forms structures for base and translated messages.
+ *
+ * @throws Error for invalid tags in base or translated messages,
+ * or if translated message has invalid plural forms.
  */
-const isTranslationValid = (baseMessage: string, translatedMessage: string): boolean
+const isTranslationValid = (baseMessage: string, translatedMessage: string, locale: Locale): boolean
 ```
 
 #### <a id="api-is-plural-form-valid"></a> isPluralFormValid
 
-```
+```js
 /**
- * Checks if plural forms are valid
- * @param str - message string
- * @param locale - message locale
- * @param key - message key, used for clearer log message
+ * Checks if plural forms are valid.
+ *
+ * @param targetStr Translated message with plural forms.
+ * @param locale Locale.
+ * @param key Optional, message key, used for clearer log message.
+ *
+ * @returns True if plural forms are valid, false otherwise.
  */
-const isPluralFormValid = (str: string, locale: Locales, key: string): boolean => {
+const isPluralFormValid = (targetStr: string, locale: Locale, key: string): boolean
 ```
 
 ## <a id="development"></a> Development

@@ -1,6 +1,11 @@
 import { parser } from './parser';
 import { isTextNode, Node } from './nodes';
-import { isPluralFormValid } from './plural';
+import {
+    getForms,
+    hasPluralForm,
+    isPluralFormValid,
+    Locale,
+} from './plural';
 
 /**
  * Compares two AST (abstract syntax tree) structures,
@@ -45,11 +50,49 @@ const areAstStructuresSame = (baseAst: Node[], targetAst: Node[]): boolean => {
 };
 
 /**
- * Validates translation against base string by AST (abstract syntax tree) structure
- * @param baseMessage - base message
- * @param translatedMessage - translated message
+ * Validates translation against base string by AST (abstract syntax tree) structure.
+ *
+ * @param baseMessage Base message.
+ * @param translatedMessage Translated message.
+ * @param locale Locale of `translatedMessage`.
+ *
+ * @returns True if translated message is valid, false otherwise:
+ * - if base message has no plural forms, it will return true if AST structures are same;
+ * - if base message has plural forms, first of all
+ *   the function checks if the number of plural forms is correct for the `locale`,
+ *   and then it validates AST plural forms structures for base and translated messages.
+ *
+ * @throws Error for invalid tags in base or translated messages,
+ * or if translated message has invalid plural forms.
  */
-export const isTranslationValid = (baseMessage: string, translatedMessage: string): boolean => {
+export const isTranslationValid = (
+    baseMessage: string,
+    translatedMessage: string,
+    locale: Locale,
+): boolean => {
+    if (hasPluralForm(baseMessage)) {
+        const isPluralFormsValid = isPluralFormValid(translatedMessage, locale);
+        if (!isPluralFormsValid) {
+            throw new Error('Invalid plural forms');
+        }
+
+        const baseForms = getForms(baseMessage);
+        const translatedForms = getForms(translatedMessage);
+
+        // check a zero form structures of base and translated messages
+        if (!isTranslationValid(baseForms[0], translatedForms[0], locale)) {
+            return false;
+        }
+        // and check other forms structures of translated messages against the first form of base message
+        for (let i = 1; i < translatedForms.length; i += 1) {
+            if (!isTranslationValid(baseForms[1], translatedForms[i], locale)) {
+                return false;
+            }
+        }
+        // if no errors, return true after all checks
+        return true;
+    }
+
     const baseMessageAst = parser(baseMessage);
     const translatedMessageAst = parser(translatedMessage);
 

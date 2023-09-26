@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { translate } from '../src/translate';
-import { Locales } from "../src/plural";
+import { Locale } from "../src/plural";
 
 interface MessagesInterface {
     [key: string]: string;
@@ -20,7 +20,7 @@ describe('translate', () => {
                     return messages[key];
                 },
 
-                getUILanguage(): Locales {
+                getUILanguage(): Locale {
                     return 'en';
                 },
 
@@ -28,7 +28,7 @@ describe('translate', () => {
                     return messages[key];
                 },
 
-                getBaseUILanguage(): Locales {
+                getBaseUILanguage(): Locale {
                     return 'en';
                 }
             }
@@ -63,7 +63,7 @@ describe('translate', () => {
                     return messages[key];
                 },
 
-                getUILanguage(): Locales {
+                getUILanguage(): Locale {
                     return 'en';
                 },
 
@@ -71,7 +71,7 @@ describe('translate', () => {
                     return messages[key];
                 },
 
-                getBaseUILanguage(): Locales {
+                getBaseUILanguage(): Locale {
                     return 'en';
                 }
             }
