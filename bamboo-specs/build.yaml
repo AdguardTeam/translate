@@ -39,6 +39,7 @@ Build:
 
             yarn install ${bamboo.varsYarn}
             yarn build
+            yarn build-txt
 
             yarn pack --filename translate.tgz
 
