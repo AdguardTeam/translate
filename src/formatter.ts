@@ -44,6 +44,23 @@ const createDefaultValues = (): Values => ({
 });
 
 /**
+ * Returns prepared error message text.
+ *
+ * @param nodeType Node type.
+ * @param nodeValue Node value.
+ * @param key String key.
+ *
+ * @returns Error message.
+ */
+const getErrorMessage = (nodeType: string, nodeValue: string, key?: string): string => {
+    let errorMessage = `Value '${nodeValue}' for '${nodeType}' was not provided`;
+    if (key) {
+        errorMessage += ` in string '${key}'`;
+    }
+    return errorMessage;
+};
+
+/**
  * This function accepts an AST (abstract syntax tree) which is a result
  * of the parser function call, and converts tree nodes into array of strings replacing node
  * values with provided values.
@@ -77,10 +94,11 @@ const createDefaultValues = (): Values => ({
  *
  * as you can see, <tag> was replaced by <b>, and placeholder was replaced by placeholder text
  *
+ * @param key
  * @param ast - AST (abstract syntax tree)
  * @param values
  */
-const format = (ast: Node[] = [], values: Values = {}): string[] => {
+const format = (key?: string, ast: Node[] = [], values: Values = {}): string[] => {
     const result: string[] = [];
 
     const tmplValues: Values = { ...createDefaultValues(), ...values };
@@ -92,7 +110,7 @@ const format = (ast: Node[] = [], values: Values = {}): string[] => {
         if (isTextNode(currentNode)) {
             result.push(currentNode.value);
         } else if (isTagNode(currentNode)) {
-            const children = [...format(currentNode.children, tmplValues)];
+            const children = [...format(key, currentNode.children, tmplValues)];
             const value = tmplValues[currentNode.value];
             if (value) {
                 // TODO consider using strong typing
@@ -102,7 +120,7 @@ const format = (ast: Node[] = [], values: Values = {}): string[] => {
                     result.push(value);
                 }
             } else {
-                throw new Error(`Value ${currentNode.value} wasn't provided`);
+                throw new Error(getErrorMessage(currentNode.type, currentNode.value, key))
             }
         } else if (isVoidTagNode(currentNode)) {
             const value = tmplValues[currentNode.value];
@@ -110,7 +128,7 @@ const format = (ast: Node[] = [], values: Values = {}): string[] => {
             if (value && typeof value === 'string') {
                 result.push(value);
             } else {
-                throw new Error(`Value ${currentNode.value} wasn't provided`);
+                throw new Error(getErrorMessage(currentNode.type, currentNode.value, key))
             }
         } else if (isPlaceholderNode(currentNode)) {
             const value = tmplValues[currentNode.value];
@@ -118,7 +136,7 @@ const format = (ast: Node[] = [], values: Values = {}): string[] => {
             if (value && typeof value === 'string') {
                 result.push(value);
             } else {
-                throw new Error(`Value ${currentNode.value} wasn't provided`);
+                throw new Error(getErrorMessage(currentNode.type, currentNode.value, key))
             }
         }
         i += 1;
@@ -135,10 +153,12 @@ const format = (ast: Node[] = [], values: Values = {}): string[] => {
  *          a: (chunks) => `<a href="#">${chunks}</a>`,
  *      });
  *      console.log(message); // ['<a href="#">some text</a>']
+ *
+ * @param key
  * @param message
- * @param [values]
+ * @param values
  */
-export const formatter = (message?: string, values?: ValuesAny): string[] => {
+export const formatter = (key?: string, message?: string, values?: ValuesAny): string[] => {
     const ast = parser(message);
 
     const preparedValues: Values = {};
@@ -156,5 +176,5 @@ export const formatter = (message?: string, values?: ValuesAny): string[] => {
         });
     }
 
-    return format(ast, preparedValues);
+    return format(key, ast, preparedValues);
 };

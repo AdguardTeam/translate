@@ -69,7 +69,7 @@ export class Translator<T> implements TranslatorInterface<T> {
                 throw new Error(`Was unable to find message for key: "${key}"`);
             }
         }
-        const formatted = formatter(message, { ...this.values, ...params });
+        const formatted = formatter(key, message, { ...this.values, ...params });
         return this.messageConstructor(formatted);
     }
 
@@ -91,7 +91,7 @@ export class Translator<T> implements TranslatorInterface<T> {
             language = this.i18n.getBaseUILanguage();
         }
         const form = getForm(message, number, language, key);
-        const formatted = formatter(form, { ...this.values, ...params, count: number });
+        const formatted = formatter(key, form, { ...this.values, ...params, count: number });
         return this.messageConstructor(formatted);
     }
 }

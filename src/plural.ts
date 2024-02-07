@@ -409,6 +409,11 @@ const checkForms = (str: string, locale: Locale, key?: string): void => {
     const givenCount = getForms(str).length;
     const requiredCount = pluralFormsCount[locale];
 
+    // e.g. 'sr-latn' may be passed and it is not supported, 'sr_latn' should be used
+    if (typeof requiredCount === 'undefined') {
+        throw new Error(`Locale is not supported: '${locale}'`);
+    }
+
     if (givenCount !== requiredCount) {
         const prefix = typeof key !== 'undefined'
             ? `Invalid plural string "${key}" for locale '${locale}'`
