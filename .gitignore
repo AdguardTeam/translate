@@ -5,3 +5,6 @@ dist/
 docs/
 .vscode
 .DS_Store
+
+.npmrc
+*.tgz
