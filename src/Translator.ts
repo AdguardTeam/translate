@@ -58,8 +58,22 @@ export class Translator<T> implements TranslatorInterface<T> {
 
     /**
      * Retrieves message and translates it, substituting parameters where necessary
-     * @param key - translation message key
+     * 
+     * IMPORTANT: Always pass string literal keys directly for static analysis compatibility.
+     * 
+     * @param key - translation message key (must be a string literal)
      * @param params - values used to substitute placeholders and tags
+     * 
+     * @example
+     * // Correct usage - string literals
+     * translator.getMessage('filtering_log_preserve_log_on');
+     * translator.getMessage('user_settings_title', { name: 'John' });
+     * 
+     * @example
+     * // Incorrect usage - variables and dynamic keys
+     * const key = 'filtering_log_preserve_log_on';
+     * translator.getMessage(key); // Don't do this
+     * translator.getMessage(titleMap[mode]); // Don't do this
      */
     public getMessage(key: string, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
@@ -75,10 +89,24 @@ export class Translator<T> implements TranslatorInterface<T> {
 
     /**
      * Retrieves correct plural form and translates it
-     * @param key - translation message key
+     * 
+     * IMPORTANT: Always pass string literal keys directly for static analysis compatibility.
+     * 
+     * @param key - translation message key (must be a string literal)
      * @param number - plural form number
      * @param params - values used to substitute placeholders or tags if necessary,
      * if params has "count" property it will be overridden by number (plural form number)
+     * 
+     * @example
+     * // Correct usage - string literals
+     * translator.getPlural('items_count', count);
+     * translator.getPlural('messages_received', messageCount, { user: 'John' });
+     * 
+     * @example
+     * // Incorrect usage - variables and dynamic keys
+     * const key = 'items_count';
+     * translator.getPlural(key, count); // Don't do this
+     * translator.getPlural(pluralKeyMap[type], count); // Don't do this
      */
     public getPlural(key: string, number: number, params: ValuesAny = {}): T {
         let message = this.i18n.getMessage(key);
