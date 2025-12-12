@@ -64,6 +64,20 @@ e.g.
 }
 ```
 
+Single `%` marks must be escaped by another `%` mark
+
+e.g.
+
+```
+"discount": {
+    "message": "You have 50%% dicount",
+}
+"discount_placeholder" {
+    "message": "You have %discount_value%%% dicount",
+}
+```
+
+
 #### <a id="tags"></a> Tags support
 
 Library supports open/close tags, and their values should be provided in the `translate` method

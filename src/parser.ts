@@ -290,9 +290,12 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
  *      ];
  * ```
  * Empty string is parsed into empty AST (abstract syntax tree): "[]"
- * If founds unbalanced tags, it throws error about it
  *
- * @param {string} str - message in simplified ICU like syntax without plural support
+ * @param str Message in simplified ICU like syntax without plural support.
+ *
+ * @returns AST representation of the input string.
+ *
+ * @throws Error if tags have attributes or string has unbalanced tags or placeholder marker '%' is unclosed.
  */
 export const parser = (str = ''): Node[] => {
     const context: Context = {
@@ -361,7 +364,12 @@ export const parser = (str = ''): Node[] => {
         lastTextStateChangeIdx,
     } = context;
 
-    // Means that tag or placeholder nodes were not closed, so we consider them as text
+    // Means that placeholder nodes were not closed
+    if (currentState === STATE.PLACEHOLDER) {
+        throw new Error(`Unclosed placeholder marker '%' in string: ${str}`);
+    }
+
+    // Means that tag node were not closed, so we consider them as text
     if (currentState !== STATE.TEXT) {
         const restText = str.substring(lastTextStateChangeIdx);
         if ((restText + text).length > 0) {

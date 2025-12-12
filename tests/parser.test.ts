@@ -155,20 +155,14 @@ describe('parser', () => {
             expect(parser(str)).toEqual(expectedAst);
         });
 
-        it('parses text with placeholder mark', () => {
+        it('throws error for unclosed placeholder mark', () => {
             const str = 'text with % placeholder mark';
-            const expectedAst = [{ type: 'text', value: 'text with % placeholder mark' }];
-            expect(parser(str)).toEqual(expectedAst);
+            expect(() => parser(str)).toThrow("Unclosed placeholder marker '%' in string");
         });
 
-        it('parses text with unbalanced placeholder mark', () => {
+        it('throws error for unbalanced placeholder mark', () => {
             const str = 'text with %replaceable% mark % text end';
-            const expectedAst = [
-                { type: 'text', value: 'text with ' },
-                { type: 'placeholder', value: 'replaceable' },
-                { type: 'text', value: ' mark % text end' },
-            ];
-            expect(parser(str)).toEqual(expectedAst);
+            expect(() => parser(str)).toThrow("Unclosed placeholder marker '%' in string");
         });
 
         it('double placeholder marks are considered as escape for %', () => {

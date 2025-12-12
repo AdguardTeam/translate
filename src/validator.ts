@@ -63,7 +63,8 @@ const areAstStructuresSame = (baseAst: Node[], targetAst: Node[]): boolean => {
  *   and then it validates AST plural forms structures for base and translated messages.
  *
  * @throws Error for invalid tags in base or translated messages,
- * or if translated message has invalid plural forms.
+ * if translated message has invalid plural forms,
+ * or if base or translated message has unclosed placeholder markers.
  */
 export const isTranslationValid = (
     baseMessage: string,
