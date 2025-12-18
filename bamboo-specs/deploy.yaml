@@ -35,7 +35,8 @@ npmjs:
             echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
             npm publish translate.tgz --access public
   requirements:
-    - adg-docker: true
+    - adg-docker: 'true'
+    - extension: 'true'
   notifications:
     - events:
         - deployment-started-and-finished
