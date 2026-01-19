@@ -56,7 +56,6 @@ Build:
             rm -rf node_modules
             echo "Size after cleanup:" && du -h | tail -n 1
   requirements:
-    - adg-docker: 'true'
     - extension: 'true'
 
 branches:
