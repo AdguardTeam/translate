@@ -4,8 +4,6 @@ plan:
   project-key: AJL
   key: TRNSLTTEST
   name: translate - test
-variables:
-  dockerContainer: adguard/node-ssh:18.13--0
 
 stages:
   - Build:
@@ -16,10 +14,6 @@ stages:
 
 Build:
   key: BUILD
-  docker:
-    image: "${bamboo.dockerContainer}"
-    volumes:
-      ${system.YARN_DIR}: "${bamboo.cacheYarn}"
   tasks:
     - checkout:
         force-clean-build: true
@@ -33,28 +27,18 @@ Build:
             # Fix mixed logs
             exec 2>&1
 
-            yarn install ${bamboo.varsYarn}
-
-            yarn lint
-            yarn test
-
-            yarn build
+            docker build \
+              --file Dockerfile \
+              --progress plain \
+              --target test-output \
+              --build-arg "YARN_FLAGS=${bamboo.varsYarn}" \
+              --output type=local,dest=output \
+              .
   final-tasks:
     - script:
         interpreter: SHELL
         scripts:
-          - |-
-            set -x
-            set -e
-
-            # Fix mixed logs
-            exec 2>&1
-
-            ls -la
-
-            echo "Size before cleanup:" && du -h | tail -n 1
-            rm -rf node_modules
-            echo "Size after cleanup:" && du -h | tail -n 1
+          - "./bamboo-specs/scripts/cleanup.sh"
   requirements:
     - extension: 'true'
 

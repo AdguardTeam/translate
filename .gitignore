@@ -8,3 +8,7 @@ docs/
 
 .npmrc
 *.tgz
+
+# Output directory for CI build
+output/
+
