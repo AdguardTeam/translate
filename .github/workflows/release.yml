@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-publish:
+    name: Build and Publish
+    runs-on: team-extensions
+    environment: extensions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build release artifacts
+        run: |
+          docker build --progress plain --target build-output --output ./ak-payload .
+          ls -la ./ak-payload/
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          docker run --rm \
+            -v "$PWD:/workdir" \
+            -e NODE_AUTH_TOKEN \
+            adguard/node-ssh:18.13--0 \
+            sh -c 'npm config set //registry.npmjs.org/:_authToken "$NODE_AUTH_TOKEN" && npm publish /workdir/ak-payload/artifacts/translate.tgz --access public'
+
+  upload-to-ak:
+    name: Upload to Artifact Keeper
+    needs: build-and-publish
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/deploy-to-ak-generic.yml@master
+    with:
+      team: extensions
+      ak-repo: extensions-libs
+      artifact-pattern: ak-payload
+    secrets: inherit
