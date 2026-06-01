@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  NODE_VERSION: '22'
+  YARN_FLAGS: '${{ vars.YARN_FLAGS || '''' }}'
+
+jobs:
+  lint:
+    name: Lint
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
+    with:
+      runs-on: '["ubuntu-latest"]'
+      lint-command: 'yarn lint'
+
+  test:
+    name: Test
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile ${{ env.YARN_FLAGS }}
+
+      - name: Run tests
+        run: yarn test
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile ${{ env.YARN_FLAGS }}
+
+      - name: Build
+        run: yarn build
