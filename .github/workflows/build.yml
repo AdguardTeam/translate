@@ -10,43 +10,12 @@ env:
   YARN_FLAGS: '${{ vars.YARN_FLAGS || '''' }}'
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: team-extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install dependencies
-        run: npx yarn install --frozen-lockfile ${{ env.YARN_FLAGS }}
-
-      - name: Run linters
-        run: npx yarn lint
-
   test:
-    name: Test
-    needs: lint
+    name: Lint, test, build
     runs-on: team-extensions
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: npx yarn install --frozen-lockfile ${{ env.YARN_FLAGS }}
-
-      - name: Run tests
-        run: npx yarn test
-
-  build:
-    name: Build
-    needs: test
-    runs-on: team-extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Install dependencies
-        run: npx yarn install --frozen-lockfile ${{ env.YARN_FLAGS }}
-
-      - name: Build
-        run: npx yarn build
+      - name: Build and test via Docker
+        run: docker build --progress plain --target test-output --build-arg "YARN_FLAGS=${YARN_FLAGS}" .
