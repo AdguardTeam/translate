@@ -15,7 +15,7 @@ jobs:
     name: Lint
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
-      runs-on: '["team-extensions"]'
+      runs-on: '["ephemeral-linux"]'
       container-image: 'adguard/node-ssh:22.17--0'
       prepare-script: 'yarn install --frozen-lockfile'
       lint-command: 'yarn lint'
@@ -26,7 +26,7 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/junit-tests.yml@master
     secrets: inherit
     with:
-      runs-on: '["team-extensions"]'
+      runs-on: '["ephemeral-linux"]'
       container-image: 'adguard/node-ssh:22.17--0'
       prepare-script: 'yarn install --frozen-lockfile'
       test-command: 'yarn test'
