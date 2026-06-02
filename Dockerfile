@@ -3,11 +3,10 @@ WORKDIR /workdir
 ENV YARN_CACHE_FOLDER=/yarn-cache
 
 FROM base AS deps
-ARG YARN_FLAGS=""
 RUN --mount=type=cache,target=/yarn-cache,id=translate-yarn \
     --mount=type=bind,source=package.json,target=package.json \
     --mount=type=bind,source=yarn.lock,target=yarn.lock \
-    yarn install --frozen-lockfile ${YARN_FLAGS}
+    yarn install --frozen-lockfile
 
 FROM base AS source-deps
 COPY --from=deps /workdir/node_modules ./node_modules
