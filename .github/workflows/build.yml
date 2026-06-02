@@ -7,12 +7,23 @@ on:
     branches: [master]
 
 jobs:
-  test:
-    name: Lint, test, build
-    runs-on: team-extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+  lint:
+    name: Lint
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
+    with:
+      runs-on: '["team-extensions"]'
+      container-image: 'adguard/node-ssh:22.17--0'
+      prepare-script: 'yarn install --frozen-lockfile'
+      lint-command: 'yarn lint'
 
-      - name: Build and test via Docker
-        run: docker build --progress plain --target test-output .
+  test:
+    name: Test
+    needs: lint
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/junit-tests.yml@master
+    with:
+      runs-on: '["team-extensions"]'
+      container-image: 'adguard/node-ssh:22.17--0'
+      container-options: ''
+      prepare-script: 'yarn install --frozen-lockfile'
+      test-command: 'yarn test'
+      results-path: 'test-results/junit.xml'

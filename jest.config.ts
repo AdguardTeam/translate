@@ -6,4 +6,8 @@ export default {
   testEnvironment: "node",
   collectCoverage: true,
   coverageDirectory: "coverage",
+  reporters: [
+    "default",
+    ["jest-junit", { outputDirectory: "test-results", outputName: "junit.xml" }],
+  ],
 };
