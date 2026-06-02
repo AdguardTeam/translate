@@ -50,4 +50,4 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Publish to npm
-        run: npm publish translate.tgz --access public
+        run: npm publish translate.tgz --access public --dry-run
