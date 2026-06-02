@@ -200,8 +200,11 @@ const tagStateHandler: StateHandlerFunc = (context: Context): STATE => {
     let { tag } = context;
 
     // if found tag end ">"
-    if (currChar === CONTROL_CHARS.TAG_CLOSE_BRACE) {// if the tag is close tag e.g. </a>
-        if (tag.indexOf(CONTROL_CHARS.CLOSING_TAG_MARK) === 0) {tag = tag.substring(1);
+    if (currChar === CONTROL_CHARS.TAG_CLOSE_BRACE) {
+        // if the tag is close tag e.g. </a>
+        if (tag.indexOf(CONTROL_CHARS.CLOSING_TAG_MARK) === 0) {
+            // remove slash from tag
+            tag = tag.substring(1);
 
             let children: Node[] = [];
             if (text.length > 0) {

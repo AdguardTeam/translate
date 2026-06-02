@@ -105,8 +105,10 @@ export enum AvailableLocales {
 
 export type Locale = keyof typeof AvailableLocales;
 
-const getPluralFormId = (locale: Locale, number): number => {
-    if (number === 0) return 0;
+const getPluralFormId = (locale: Locale, number: number): number => {
+    if (number === 0) {
+        return 0;
+    }
 
     const slavNum = ((number % 10 === 1) && (number % 100 !== 11))
         ? 1
