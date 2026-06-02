@@ -32,8 +32,7 @@ COPY --from=test /out/ /
 # =============================================================================
 
 FROM source-deps AS build
-RUN yarn build && yarn build-txt && yarn pack --filename translate.tgz
+RUN yarn build && yarn pack --filename translate.tgz
 
 FROM scratch AS build-output
 COPY --from=build /workdir/translate.tgz /artifacts/translate.tgz
-COPY --from=build /workdir/dist/build.txt /artifacts/build.txt
