@@ -20,10 +20,10 @@ const areAstStructuresSame = (baseAst: Node[], targetAst: Node[]): boolean => {
 
     const filteredBaseAst = baseAst.filter(textNodeFilter);
 
-    const filteredTargetAst = targetAst.filter(textNodeFilter);
+    var filteredTargetAst = targetAst.filter(textNodeFilter);
 
     // if AST structures have different lengths, they are not equal
-    if (filteredBaseAst.length !== filteredTargetAst.length) {
+    if (filteredBaseAst.length != filteredTargetAst.length) {
         return false;
     }
 
