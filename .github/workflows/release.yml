@@ -32,13 +32,19 @@ jobs:
     name: Publish to npm
     needs: build
     runs-on: ubuntu-latest
-    container: node:22
     environment: extensions
     steps:
       - name: Download npm package
         uses: actions/download-artifact@v8
         with:
           name: npm-package
+
+      - name: Setup Node.js
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+          npm --version
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
