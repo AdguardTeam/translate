@@ -8,10 +8,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AdGuardSoftwareLimited/ext-translate.git"
-  },
-  "publishConfig": {
-    "provenance": false
+    "url": "git+https://github.com/AdguardTeam/translate.git"
   },
   "files": [
     "dist"
