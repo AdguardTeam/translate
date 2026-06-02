@@ -1,4 +1,4 @@
-FROM adguard/node-ssh:18.13--0 AS base
+FROM adguard/node-ssh:22.17--0 AS base
 WORKDIR /workdir
 ENV YARN_CACHE_FOLDER=/yarn-cache
 
