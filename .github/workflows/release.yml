@@ -51,3 +51,5 @@ jobs:
 
       - name: Publish to npm
         run: npm publish translate.tgz --access public --dry-run
+        env:
+          NPM_CONFIG_PROVENANCE: false
