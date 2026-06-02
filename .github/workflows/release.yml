@@ -5,11 +5,14 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
-  build-and-publish:
-    name: Build and Publish
+  build:
+    name: Build
     runs-on: team-extensions
-    environment: extensions
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -19,12 +22,32 @@ jobs:
           docker build --progress plain --target build-output --output ./artifacts .
           ls -la ./artifacts/
 
-      - name: Publish to npm (dry run)
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          docker run --rm \
-            -v "$PWD:/workdir" \
-            -e NODE_AUTH_TOKEN \
-            adguard/node-ssh:22.17--0 \
-            sh -c 'npm config set //registry.npmjs.org/:_authToken "$NODE_AUTH_TOKEN" && npm publish /workdir/artifacts/artifacts/translate.tgz --access public --dry-run'
+      - name: Upload npm package
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: artifacts/artifacts/translate.tgz
+
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    environment: extensions
+    steps:
+      - name: Download npm package
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        run: npm publish translate.tgz --access public
