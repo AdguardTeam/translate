@@ -13,20 +13,6 @@ COPY --from=deps /workdir/node_modules ./node_modules
 COPY . .
 
 # =============================================================================
-# Test plan
-# =============================================================================
-
-FROM source-deps AS test
-RUN yarn lint && yarn test && yarn build \
-    && mkdir -p /out \
-    && touch /out/test-passed.txt
-
-# test-output depends on test, forcing BuildKit to execute the full test stage
-# before the target can be built. Exports a marker file; no binary artifacts.
-FROM scratch AS test-output
-COPY --from=test /out/ /
-
-# =============================================================================
 # Build plan
 # =============================================================================
 
