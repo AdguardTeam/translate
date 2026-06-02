@@ -20,10 +20,10 @@ jobs:
     name: Test
     needs: lint
     uses: AdGuardSoftwareLimited/actions/.github/workflows/junit-tests.yml@master
+    secrets: inherit
     with:
       runs-on: '["team-extensions"]'
       container-image: 'adguard/node-ssh:22.17--0'
-      container-options: ''
       prepare-script: 'yarn install --frozen-lockfile'
       test-command: 'yarn test'
       results-path: 'test-results/junit.xml'
