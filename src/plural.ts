@@ -1,5 +1,3 @@
-let someLetThatShouldBeConst = 42;
-
 export enum AvailableLocales {
     az = 'az',
     bo = 'bo',
