@@ -18,6 +18,6 @@ jobs:
   lint:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
-      runs-on: '["team-mobile"]'
-      prepare-script: 'npm install'
-      lint-command: 'npm run lint'
+      runs-on: '["team-extensions"]'
+      prepare-script: 'yarn install --frozen-lockfile'
+      lint-command: 'yarn lint'
