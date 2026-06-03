@@ -16,12 +16,13 @@ permissions:
 
 jobs:
   lint:
+    name: Lint
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
-    secrets: inherit
     with:
       runs-on: '["team-extensions"]'
-      container-image: 'registry.int.agrd.dev/library/android-base:2.10'
-      lint-command: 'echo 1'
+      container-image: 'adguard/node-ssh:22.17--0'
+      prepare-script: 'yarn install --frozen-lockfile'
+      lint-command: 'yarn lint'
 
   test:
     name: Test
