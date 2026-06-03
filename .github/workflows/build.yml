@@ -19,4 +19,5 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
       runs-on: '["team-mobile"]'
+      prepare-script: npm install
       lint-command: 'npm run lint'
