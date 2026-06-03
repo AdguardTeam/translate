@@ -51,6 +51,6 @@ jobs:
         run: npm config set registry https://registry.npmjs.org/
 
       - name: Publish to npm
-        run: npm publish translate.tgz --access public
+        run: npm publish translate.tgz --access public --dry-run
         env:
           NPM_CONFIG_PROVENANCE: false
