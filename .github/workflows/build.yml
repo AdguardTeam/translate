@@ -19,7 +19,7 @@ jobs:
     name: Lint
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
-      runs-on: team-extensions
+      runs-on: '["team-extensions"]'
       container-image: 'adguard/node-ssh:22.17--0'
       prepare-script: |
         export YARN_CACHE_FOLDER="${{ github.workspace }}/.yarn-cache"
@@ -32,7 +32,7 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/junit-tests.yml@master
     secrets: inherit
     with:
-      runs-on: team-extensions
+      runs-on: '["team-extensions"]'
       container-image: 'adguard/node-ssh:22.17--0'
       prepare-script: |
         export YARN_CACHE_FOLDER="${{ github.workspace }}/.yarn-cache"
