@@ -45,7 +45,6 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: npm-package
-          if-no-files-found: error
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
