@@ -23,16 +23,18 @@ jobs:
           ls -la ./artifacts/
 
       - name: Upload npm package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v8
         with:
           name: npm-package
-          path: artifacts/artifacts/translate.tgz
+          path: artifacts/translate.tgz
 
   publish:
     name: Publish to npm
     needs: build
     runs-on: ubuntu-latest
-    container: node:22
+    # Trusted publishing requires npm CLI version 11.5.1 or later
+    # and Node version 22.14.0 or higher.
+    container: node:24
     environment: extensions
     steps:
       - name: Download npm package
@@ -42,9 +44,6 @@ jobs:
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
-
-      - name: Update npm
-        run: npm install -g npm@latest
 
       - name: Publish to npm
         run: npm publish translate.tgz --access public --dry-run

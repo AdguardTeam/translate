@@ -17,9 +17,10 @@ COPY . .
 # =============================================================================
 
 FROM source-deps AS test
-RUN yarn lint && yarn test && yarn build \
-    && mkdir -p /out \
-    && touch /out/test-passed.txt
+RUN yarn lint
+RUN yarn test
+RUN yarn build
+RUN mkdir -p /out && touch /out/test-passed.txt
 
 # test-output depends on test, forcing BuildKit to execute the full test stage
 # before the target can be built. Exports a marker file; no binary artifacts.
@@ -34,4 +35,4 @@ FROM source-deps AS build
 RUN yarn build && yarn pack --filename translate.tgz
 
 FROM scratch AS build-output
-COPY --from=build /workdir/translate.tgz /artifacts/translate.tgz
+COPY --from=build /workdir/translate.tgz /translate.tgz
