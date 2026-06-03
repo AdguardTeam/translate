@@ -49,7 +49,17 @@ jobs:
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
 
+      # FIXME: Remove check for tag after testing release.
+      # FIXME: Remove --dry-run after testing release.
+      # npm requires --tag for prerelease versions (e.g. v2.0.6-beta.1),
+      # otherwise they would be published as 'latest'.
       - name: Publish to npm
-        run: npm publish translate.tgz --access public --dry-run
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if echo "$VERSION" | grep -q '-'; then
+            npm publish translate.tgz --access public --tag next --dry-run
+          else
+            npm publish translate.tgz --access public --dry-run
+          fi
         env:
           NPM_CONFIG_PROVENANCE: false
