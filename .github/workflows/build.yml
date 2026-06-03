@@ -20,7 +20,11 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
       runs-on: '["team-extensions"]'
-      prepare-script: 'yarn install --frozen-lockfile'
+      prepare-script: |
+        curl -fsSL https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-x64.tar.xz | tar -xJ -C /tmp
+        echo "/tmp/node-v22.17.0-linux-x64/bin" >> "$GITHUB_PATH"
+        corepack enable
+        yarn install --frozen-lockfile
       lint-command: 'yarn lint'
 
   test:
@@ -30,6 +34,10 @@ jobs:
     secrets: inherit
     with:
       runs-on: '["team-extensions"]'
-      prepare-script: 'yarn install --frozen-lockfile'
+      prepare-script: |
+        curl -fsSL https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-x64.tar.xz | tar -xJ -C /tmp
+        echo "/tmp/node-v22.17.0-linux-x64/bin" >> "$GITHUB_PATH"
+        corepack enable
+        yarn install --frozen-lockfile
       test-command: 'yarn test'
       results-path: 'test-results/junit.xml'
