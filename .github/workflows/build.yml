@@ -20,9 +20,18 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
       runs-on: '["team-extensions"]'
-      container-image: 'adguard/node-ssh:22.17--0'
-      prepare-script: 'yarn install --frozen-lockfile'
-      lint-command: 'yarn lint'
+      prepare-script: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          adguard/node-ssh:22.17--0 \
+          yarn install --frozen-lockfile
+      lint-command: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          adguard/node-ssh:22.17--0 \
+          yarn lint
 
   test:
     name: Test
@@ -31,7 +40,16 @@ jobs:
     secrets: inherit
     with:
       runs-on: '["team-extensions"]'
-      container-image: 'adguard/node-ssh:22.17--0'
-      prepare-script: 'yarn install --frozen-lockfile'
-      test-command: 'yarn test'
+      prepare-script: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          adguard/node-ssh:22.17--0 \
+          yarn install --frozen-lockfile
+      test-command: |
+        docker run --rm \
+          -v "${{ github.workspace }}:/workspace" \
+          -w /workspace \
+          adguard/node-ssh:22.17--0 \
+          yarn test
       results-path: 'test-results/junit.xml'
