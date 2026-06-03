@@ -20,7 +20,7 @@ jobs:
     uses: AdGuardSoftwareLimited/actions/.github/workflows/lint.yml@master
     with:
       runs-on: '["team-extensions"]'
-      container-image: 'registry.int.agrd.dev/library/adguard/node-ssh:22.17--0'
+      container-image: 'registry.int.agrd.dev/library/android-base:2.10'
       prepare-script: |
         export YARN_CACHE_FOLDER="${{ github.workspace }}/.yarn-cache"
         yarn install --frozen-lockfile
