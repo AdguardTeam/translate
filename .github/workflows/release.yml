@@ -55,7 +55,7 @@ jobs:
       # otherwise they would be published as 'latest'.
       - name: Publish to npm
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION="${GITHUB_REF#refs/tags/v}"
           if echo "$VERSION" | grep -q '-'; then
             npm publish translate.tgz --access public --tag next --dry-run
           else
