@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
 
+# For Trusted Publishing
 permissions:
   contents: read
   id-token: write
@@ -17,37 +18,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Set version from tag
+        run: npm version --no-git-tag-version "${GITHUB_REF#refs/tags/v}"
+
       - name: Build release artifacts
         run: |
           docker build --progress plain --target build-output --output ./artifacts .
           ls -la ./artifacts/
 
       - name: Upload npm package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-package
-          path: artifacts/artifacts/translate.tgz
+          path: artifacts/translate.tgz
 
   publish:
     name: Publish to npm
     needs: build
     runs-on: ubuntu-latest
+    # Trusted publishing requires npm CLI version 11.5.1 or later
+    # and Node version 22.14.0 or higher.
+    container: node:24
     environment: extensions
     steps:
       - name: Download npm package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: npm-package
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org/
 
-      - name: Update npm
-        run: npm install -g npm@latest
-
+      # npm requires --tag for prerelease versions (e.g. v2.0.6-beta.1),
+      # otherwise they would be published as 'latest'.
       - name: Publish to npm
-        run: npm publish translate.tgz --access public --dry-run
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if echo "$VERSION" | grep -q '-'; then
+            npm publish translate.tgz --access public --tag next --dry-run
+          else
+            npm publish translate.tgz --access public --dry-run
+          fi
+        env:
+          NPM_CONFIG_PROVENANCE: false
