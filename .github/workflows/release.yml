@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
 
+# For Trusted Publishing
 permissions:
   contents: read
   id-token: write
@@ -16,6 +17,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Set version from tag
+        run: npm version --no-git-tag-version "${GITHUB_REF#refs/tags/v}"
 
       - name: Build release artifacts
         run: |
@@ -41,11 +45,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: npm-package
+          if-no-files-found: error
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
 
       - name: Publish to npm
-        run: npm publish translate.tgz --access public --dry-run
+        run: npm publish translate.tgz --access public
         env:
           NPM_CONFIG_PROVENANCE: false
