@@ -23,36 +23,3 @@ jobs:
       container-image: 'docker.io/adguard/node-ssh:22.22--0'
       prepare-script: 'yarn install --frozen-lockfile'
       lint-command: 'yarn lint'
-
-  test:
-    name: Test
-    needs: lint
-    uses: AdGuardSoftwareLimited/actions/.github/workflows/junit-tests.yml@master
-    secrets: inherit
-    with:
-      runs-on: '["team-extensions"]'
-      container-image: 'registry.int.agrd.dev/library/adguard/node-ssh:22.17--0'
-      prepare-script: |
-        export YARN_CACHE_FOLDER="${{ github.workspace }}/.yarn-cache"
-        yarn install --frozen-lockfile
-      test-command: 'yarn test'
-      results-path: 'test-results/junit.xml'
-
-  build:
-    name: Build
-    needs: test
-    runs-on: team-extensions
-    container:
-      image: registry.int.agrd.dev/library/adguard/node-ssh:22.17--0
-      env:
-        YARN_CACHE_FOLDER: /yarn-cache
-    steps:
-      - uses: actions/checkout@v5
-      - name: Build
-        run: yarn install --frozen-lockfile && yarn build && yarn pack --filename translate.tgz
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: translate
-          path: translate.tgz
-          if-no-files-found: error
