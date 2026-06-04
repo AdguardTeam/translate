@@ -40,11 +40,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: npm-package
+          path: .
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
 
       - name: Publish to npm
-        run: npm publish translate.tgz --access public
+        run: npm publish artifacts/translate.tgz --access public
         env:
           NPM_CONFIG_PROVENANCE: false

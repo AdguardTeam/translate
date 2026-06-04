@@ -209,9 +209,6 @@ const message = t.getMessage('agreement_consent', {
 t.getPlural('servers_count', 1);   // "1 server"
 t.getPlural('servers_count', 5);   // "5 servers"
 t.getPlural('servers_count', 0);   // "No servers"
-
-// Custom count label via params
-t.getPlural('servers_count', 3, { count: 'three' }); // "three servers"
 ```
 
 ### React Integration

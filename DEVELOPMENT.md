@@ -264,7 +264,7 @@ The artifact `translate.tgz` will be in the `out/` directory.
 ### Build Fails with Type Errors
 
 1. Run `yarn lint` first — many type errors are caught by ESLint.
-2. Check that you're on a compatible Node.js version: `node --version` (≥10 required).
+2. Check that you're on a compatible Node.js version: `node --version` (≥14 required).
 3. Clear caches and rebuild:
    ```bash
    rm -rf dist node_modules
