@@ -1,364 +1,290 @@
 # AdGuard Translate
 
-Simple internationalization library with React integration
+<p align="center">
+  Simple internationalization library with React integration
+</p>
 
-* [Installation](#installation)
-    * [npm](#npm)
-    * [Yarn](#yarn)
-* [Usage](#usage)
-    * [Messages format](#messages-format)
-        * [Placeholders](#placeholders)
-        * [Tags support](#tags-support)
-            * [Default list of tags](#default-list-of-tags)
-        * [Plural strings](#plural-strings)
-    * [translate](#translate)
-        * [createTranslator](#create-translator)
-        * [createReactTranslator](#create-react-translator)
-    * [validator](#validator)
-        * [isTranslationValid](#is-translation-valid)
-        * [isPluralFormValid](#is-plural-form-valid)
-    * [API](#api)
-        * [createTranslator](#api-create-translator)
-        * [createReactTranslator](#api-create-react-translator)
-        * [getMessage](#api-get-message)
-        * [getPlural](#api-get-plural)
-        * [isTranslationValid](#api-is-translation-valid)
-        * [isPluralFormValid](#api-is-plural-form-valid)
-* [Development](#development)
-    * [Build](#build)
-    * [Lint](#lint)
-    * [Test](#test)
-    * [Docs](#docs)
-    * [TODO](#todo)
-* [License](#license)
+## Description
 
-## <a id="installation"></a> Installation
+**AdGuard Translate** is a TypeScript internationalization library for
+AdGuard product developers building browser extensions and web applications.
+It provides a unified i18n layer across AdGuard products, solving the
+problem of inconsistent translation handling between different codebases.
 
-### <a id="npm"></a> npm
+The library supports message translation with placeholder substitution,
+XML tag interpolation (essential for UI framework integration), and plural
+form rules for ~80 locales. It ships with React and Preact integrations and
+a translation validator for CI/CD quality gates. It has zero runtime
+dependencies.
 
-```
+## Table of Contents
+
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Messages Format](#messages-format)
+  - [Placeholders](#placeholders)
+  - [Tags](#tags)
+  - [Plural Strings](#plural-strings)
+- [API Overview](#api-overview)
+- [Usage Examples](#usage-examples)
+  - [Basic Translation](#basic-translation)
+  - [Plural Forms](#plural-forms)
+  - [React Integration](#react-integration)
+  - [Translation Validation](#translation-validation)
+- [Configuration](#configuration)
+- [Documentation](#documentation)
+
+---
+
+## Installation
+
+```bash
 npm install @adguard/translate
 ```
 
-### <a id="yarn"></a> Yarn
+Or with Yarn:
 
-```
+```bash
 yarn add @adguard/translate
 ```
 
-## <a id="usage"></a> Usage
+React and Preact are optional peer dependencies — install them only if you
+use the corresponding plugin.
 
-### <a id="messages-format"></a> Messages format
+---
 
-Library supports messages with placeholders, tags and plural forms
+## Quick Start
 
-#### <a id="placeholders"></a> Placeholders
+Import the library, implement the `I18nInterface`, and start translating:
 
-Placeholders should be wrapped in `%` mark
+```ts
+import { translate, I18nInterface } from '@adguard/translate';
 
-e.g.
+const i18n: I18nInterface = {
+  getMessage(key) {
+    const messages: Record<string, string> = {
+      greeting: 'Hello, %name%!',
+    };
+    return messages[key];
+  },
+  getUILanguage() { return 'en'; },
+  getBaseMessage(key) {
+    const messages: Record<string, string> = {
+      greeting: 'Hello, %name%!',
+    };
+    return messages[key];
+  },
+  getBaseUILanguage() { return 'en'; },
+};
+
+const t = translate.createTranslator(i18n);
+
+t.getMessage('greeting', { name: 'World' }); // "Hello, World!"
+```
+
+---
+
+## Messages Format
+
+### Placeholders
+
+Placeholders are wrapped in `%` marks:
 
 ```
 "agreement_consent": {
-    "message": "Servers number %count%",
+    "message": "Servers number %count%"
 }
 ```
 
-Single `%` marks must be escaped by another `%` mark
-
-e.g.
+Literal `%` characters must be escaped with another `%`:
 
 ```
 "discount": {
-    "message": "You have 50%% dicount",
-}
-"discount_placeholder" {
-    "message": "You have %discount_value%%% dicount",
+    "message": "You have 50%% discount"
 }
 ```
 
+### Tags
 
-#### <a id="tags"></a> Tags support
-
-Library supports open/close tags, and their values should be provided in the `translate` method
-
-e.g.
+Messages support open/close tags with custom renderers:
 
 ```
 <a>link</a> to the text
 ```
 
-and void tags
-
-e.g.
+And void (self-closing) tags:
 
 ```
-<img src="server.jpg" >
+<img>
 ```
 
-##### <a id="default-list-of-tags"></a> Default list of tags
+The following tags are available by default and do not need explicit
+renderers: `b`, `p`, `strong`, `tt`, `s`, `i`.
 
-Next tags are not required in the `translate`, because they are provided by default
+### Plural Strings
 
-```
-    <b>, <p>, <strong>, <tt>, <s>, <i>,
-```
-
-#### <a id="plural-strings"></a> Plural strings
-
-Library supports plural strings translation.
-
-e.g.
+Plural strings are separated by `|`:
 
 ```
-Нет серверов | %count% сервер | %count% сервера | %count% серверов
+No servers | %count% server | %count% servers
 ```
 
-Plural strings should follow simple rules.
+Rules for plural strings:
 
-1. Plural forms should be divided by `|`.
-2. Plural forms count should correspond to the language plural forms count ([table](https://github.com/translate/l10n-guide/blob/master/docs/l10n/pluralforms.rst)) + 1 (zero form).
-3. If first plural form is omitted, for the zero form you'll get empty string
-
-```
-| %count% сервер | %count% сервера | %count% серверов
-```
-
-### <a id="translate"></a> translate
+1. Forms are divided by `|`.
+2. The number of forms must match the locale's plural rule count
+   (see the [CLDR plural rules table](https://github.com/translate/l10n-guide/blob/master/docs/l10n/pluralforms.rst)).
+3. The first form is the zero form. If omitted, the zero form returns an
+   empty string:
 
 ```
-// import library
-import { translate } from '@adguard/translate'
-
-// create i18n object which implements I18nInterface:
-interface I18nInterface {
-    /**
-     * Returns message by key for current locale
-     * @param key
-     */
-    getMessage(key: string): string;
-
-    /**
-     * Returns current locale code
-     * Locale codes should be in the list of `Locale`s
-     */
-    getUILanguage(): Locale;
-
-    /**
-     * Returns base locale message
-     * @param key
-     */
-    getBaseMessage(key: string): string;
-
-    /**
-     * Returns base locale code
-     */
-    getBaseUILanguage(): Locale;
-}
-
-// in the browser extension it will be "browser.i18n"
-
-// create translate function
-const translator = translate.createTranslator(i18n)
-
-// e.g.
-//  string to translate:
-//  "agreement_consent": {
-//      "message": "You agree to our <eula>EULA</eula>",
-//  }
+| %count% server | %count% servers
 ```
 
-#### <a id="create-translator"></a> createTranslator
+---
 
-This method can be used to translate simple strings and Vue template strings
+## API Overview
 
-```
-const translator = translate.createTranslator(browser.i18n);
-const translatedString = translator.getMessage('agreement_consent', {
-    eula: (chunks) => `<button class="privacy-link">${chunks}</button>`,
+### `translate.createTranslator(i18n, messageConstructor?, values?)`
+
+Creates a `Translator` instance that returns strings. Accepts an optional
+`messageConstructor` for custom output formats (e.g., building DOM nodes
+instead of strings) and optional default tag values.
+
+### `translate.createReactTranslator(i18n, React, defaults?)`
+
+Creates a `Translator` that returns React nodes. Tag handler functions
+receive React children and must return React elements.
+
+### `translate.createPreactTranslator(i18n, Preact, defaults?)`
+
+Creates a `Translator` that returns Preact component children. Tag handler
+functions receive Preact children and must return Preact elements.
+
+### `Translator.getMessage(key, params?)`
+
+Translates a message by key, substituting placeholders and tags with values
+from `params`. Throws if the key is not found.
+
+### `Translator.getPlural(key, number, params?)`
+
+Selects the correct plural form based on `number` and the current locale,
+then translates it. Adds `count` to `params` automatically.
+
+### `validator.isTranslationValid(baseMessage, translatedMessage, locale)`
+
+Validates that a translated message has the same AST structure (tags and
+placeholders) as the base message. For plural strings, also validates that
+the number of forms is correct for the locale. Returns `true` if valid,
+throws on structurally invalid input.
+
+### `validator.isPluralFormValid(message, locale)`
+
+Checks that a message has the correct number of plural forms for the given
+locale. Returns `true` if valid, `false` otherwise.
+
+---
+
+## Usage Examples
+
+### Basic Translation
+
+```ts
+const t = translate.createTranslator(i18n);
+
+const message = t.getMessage('agreement_consent', {
+  eula: (chunks) => `<button class="privacy-link">${chunks}</button>`,
 });
-
-console.log(translatedString); // <button class="privacy-link">EULA</button>
+// '<button class="privacy-link">EULA</button>'
 ```
 
-#### <a id="create-react-translator"></a> createReactTranslator
+### Plural Forms
 
-```
-const reactTranslator = translate.createReactTranslator(browser.i18n, React);
+```ts
+t.getPlural('servers_count', 1);   // "1 server"
+t.getPlural('servers_count', 5);   // "5 servers"
+t.getPlural('servers_count', 0);   // "No servers"
 
-<div>
-    {reactTranslator.getMessage('agreement_consent', {
-        eula: (chunks) => (
-            <button
-                className="auth__term"
-                onClick={handleEulaClick}
-            >
-                {chunks}
-            </button>
-        ),
-    })}
-</div>
+// Custom count label via params
+t.getPlural('servers_count', 3, { count: 'three' }); // "three servers"
 ```
 
-### <a id="validator"></a> validator
+### React Integration
 
-```
-// import library
-import { validator } from '@adguard/translate'
-```
+```tsx
+const t = translate.createReactTranslator(i18n, React);
 
-#### <a id="is-translation-valid"></a> isTranslationValid
-
-```
-const baseMessage = 'test string <a>has node</a>';
-const targetMessage = 'тестовая строка <a>с нодой</a>';
-
-validator.isTranslationValid(baseMessage, targetMessage); // true
-```
-
-#### <a id="is-plural-form-valid"></a> isPluralFormValid
-
-```
-validator.isPluralFormValid(%count% серверов | %count% сервер | %count% сервера | %count% серверов, 'ru', "servers_count"); // true, all 4 plural forms are provided
-
-validator.isPluralFormValid(%count% сервера | %count% серверов, 'ru', "servers_count"); // false, ru locale awaits for 4 plural forms provided
+const element = t.getMessage('agreement_consent', {
+  eula: (chunks) => (
+    <button className="auth__term" onClick={handleEulaClick}>
+      {chunks}
+    </button>
+  ),
+});
+// Renders: You agree to our <button class="auth__term">EULA</button>
 ```
 
-### <a id="api"></a> API
+### Translation Validation
 
-#### <a id="api-create-translator"></a> createTranslator
+```ts
+import { validator } from '@adguard/translate';
 
-```
-/**
- * Creates translator instance strings, by default for simple strings
- * @param i18n - function which returns translated message by key
- * @param messageConstructor - function that will collect messages
- * @param values - map with default values for tag converters
- */
-const createTranslator = (
-    i18n: I18nInterface,
-    messageConstructor?: MessageConstructorInterface,
-    values?: ValuesAny
-): Translator
-```
+// Simple message validation
+validator.isTranslationValid(
+  'test string <a>has node</a>',
+  'тестовая строка <a>с нодой</a>',
+  'ru',
+); // true
 
-#### <a id="api-create-react-translator"></a> createReactTranslator
-
-```
-/**
- * Creates translation function for strings used in the React components
- * We do not import React directly, because translator module can be used
- * in the modules without React too
- *
- *
- * @param i18n - object with methods which get translated message by key and return current locale
- * @param React - instance of react library
- */
-  const createReactTranslator = (i18n: I18nInterface, React: ReactCustom): Translator
+// Plural form validation
+validator.isPluralFormValid(
+  '%count% серверов | %count% сервер | %count% сервера | %count% серверов',
+  'ru',
+); // true (Russian has 4 plural forms)
 ```
 
-#### <a id="api-get-message"></a> getMessage
-```
-/**
- * Retrieves message and translates it, substituting parameters where necessary
- * @param key - translation message key
- * @param params - values used to substitute placeholders and tags
- */
-public getMessage(key: string, params: ValuesAny = {}): T {
-```
+---
 
-#### <a id='api-get-plural'></a> getPlural
-```
-/**
- * Retrieves correct plural form and translates it
- * @param key - translation message key
- * @param number - plural form number
- * @param params - values used to substitute placeholders or tags if necessary,
- * if params has "count" property it will be overridden by number (plural form number)
- */
-public getPlural(key: string, number: number, params: ValuesAny = {}): T {
+## Configuration
+
+### I18nInterface
+
+Consumers must implement `I18nInterface` to provide translations:
+
+```ts
+interface I18nInterface {
+  getMessage(key: string): string;
+  getUILanguage(): Locale;
+  getBaseMessage(key: string): string;
+  getBaseUILanguage(): Locale;
+}
 ```
 
-#### <a id="api-is-translation-valid"></a> isTranslationValid
+In browser extensions, this is typically implemented using `browser.i18n`.
 
-```js
-/**
- * Validates translation against base string by AST (abstract syntax tree) structure.
- *
- * @param baseMessage Base message.
- * @param translatedMessage Translated message.
- * @param locale Locale of `translatedMessage`.
- *
- * @returns True if translated message is valid, false otherwise:
- * - if base message has no plural forms, it will return true if AST structures are same;
- * - if base message has plural forms, first of all
- *   the function checks if the number of plural forms is correct for the `locale`,
- *   and then it validates AST plural forms structures for base and translated messages.
- *
- * @throws Error for invalid tags in base or translated messages,
- * or if translated message has invalid plural forms.
- */
-const isTranslationValid = (baseMessage: string, translatedMessage: string, locale: Locale): boolean
+### Default Tags for React / Preact
+
+The React and Preact translators include built-in renderers for `p`, `b`,
+`strong`, `tt`, `s`, and `i`. You can override or extend these via the
+`defaults` parameter:
+
+```ts
+const t = createReactTranslator(i18n, React, {
+  override: false,
+  tags: [{ key: 'custom', createdTag: 'span' }],
+});
 ```
 
-#### <a id="api-is-plural-form-valid"></a> isPluralFormValid
+### Custom Message Constructor
 
-```js
-/**
- * Checks if plural forms are valid.
- *
- * @param targetStr Translated message with plural forms.
- * @param locale Locale.
- * @param key Optional, message key, used for clearer log message.
- *
- * @returns True if plural forms are valid, false otherwise.
- */
-const isPluralFormValid = (targetStr: string, locale: Locale, key: string): boolean
-```
+For advanced use cases (e.g., building virtual DOM nodes directly), pass a
+`MessageConstructorInterface` function. It receives an array of formatted
+string parts and returns your desired output type.
 
-## <a id="development"></a> Development
+---
 
-Use yarn to build the library
+## Documentation
 
-### <a id="build"></a> Build
-
-To build the library run:
-
-```
-yarn build
-```
-
-Build result would be in the `dist` directory
-
-### <a id="lint"></a> Lint
-
-To check lint errors run in terminal:
-
-```
-yarn lint
-```
-
-### <a id="test"></a> Test
-
-The library uses jest for running unit-tests. To launch the tests, run the following command in the terminal:
-
-```
-yarn test
-```
-
-### <a id="docs"></a> Docs
-
-To build documentation, run the following command in the terminal:
-
-```
-yarn docs
-```
-
-### <a id="todo"></a> TODO
-
-- [ ] Create Vue plugin
-- [ ] Add utility to check if code contains unused or redundant translation messages
-
-### <a id="license"></a> License
-
-MIT
+- [Development](DEVELOPMENT.md)
+- [Changelog](CHANGELOG.md)
+- [LLM agent rules](AGENTS.md)
