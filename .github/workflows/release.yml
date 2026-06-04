@@ -1,9 +1,7 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 # For Trusted Publishing
 permissions:
@@ -17,9 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Set version from tag
-        run: npm version --no-git-tag-version "${GITHUB_REF#refs/tags/v}"
 
       - name: Build release artifacts
         run: |
@@ -49,17 +44,7 @@ jobs:
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
 
-      # FIXME: Remove check for tag after testing release.
-      # FIXME: Remove --dry-run after testing release.
-      # npm requires --tag for prerelease versions (e.g. v2.0.6-beta.1),
-      # otherwise they would be published as 'latest'.
       - name: Publish to npm
-        run: |
-          VERSION="${GITHUB_REF#refs/tags/v}"
-          if echo "$VERSION" | grep -q '-'; then
-            npm publish translate.tgz --access public --tag next --dry-run
-          else
-            npm publish translate.tgz --access public --dry-run
-          fi
+        run: npm publish translate.tgz --access public
         env:
           NPM_CONFIG_PROVENANCE: false
