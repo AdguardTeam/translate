@@ -95,7 +95,7 @@ t.getMessage('greeting', { name: 'World' }); // "Hello, World!"
 
 Placeholders are wrapped in `%` marks:
 
-```
+```text
 "agreement_consent": {
     "message": "Servers number %count%"
 }
@@ -103,7 +103,7 @@ Placeholders are wrapped in `%` marks:
 
 Literal `%` characters must be escaped with another `%`:
 
-```
+```text
 "discount": {
     "message": "You have 50%% discount"
 }
@@ -113,13 +113,13 @@ Literal `%` characters must be escaped with another `%`:
 
 Messages support open/close tags with custom renderers:
 
-```
+```text
 <a>link</a> to the text
 ```
 
 And void (self-closing) tags:
 
-```
+```text
 <img>
 ```
 
@@ -130,7 +130,7 @@ renderers: `b`, `p`, `strong`, `tt`, `s`, `i`.
 
 Plural strings are separated by `|`:
 
-```
+```text
 No servers | %count% server | %count% servers
 ```
 
@@ -142,7 +142,7 @@ Rules for plural strings:
 3. The first form is the zero form. If omitted, the zero form returns an
    empty string:
 
-```
+```text
 | %count% server | %count% servers
 ```
 
@@ -151,16 +151,18 @@ Rules for plural strings:
 Messages support three types of dynamic labels. All of them pull values
 from the `params` object passed to `getMessage()` or `getPlural()`:
 
+<!-- markdownlint-disable MD013 -->
 | Type | Syntax | `params` value type | Example |
 |---|---|---|---|
 | **Placeholder** | `%name%` | `string` | `{ name: 'World' }` |
 | **Tag** | `<tag>...</tag>` | `(children: string) => string` | `{ a: (c) => '<a>'+c+'</a>' }` |
 | **Void tag** | `<tag/>` | `string` | `{ img: '<img src="..."/>' }` |
+<!-- markdownlint-enable MD013 -->
 
 **Placeholders** are replaced verbatim with the matching string value
 from `params`:
 
-```
+```text
 "message": "Hello, %username%!"
 // params: { username: 'Alice' }
 // result: "Hello, Alice!"
@@ -170,7 +172,7 @@ from `params`:
 content as a string argument. The function can wrap or transform the
 children:
 
-```
+```text
 "message": "Read our <terms>Terms of Service</terms>"
 // params: { terms: (c) => `<a href="/terms">${c}</a>` }
 // result: 'Read our <a href="/terms">Terms of Service</a>'
@@ -181,13 +183,14 @@ string is used directly and the children are discarded.
 
 **Void tags** are self-closing and replaced with a plain string:
 
-```
+```text
 "message": "Status: <status-icon/>"
 // params: { 'status-icon': '<span class="ok"/>' }
 ```
 
 #### Edge Cases
 
+<!-- markdownlint-disable MD013 MD056 -->
 | Scenario | Behavior |
 |---|---|
 | **Escaped percent** `%%` | Produces a literal `%` in output. Use this where a percent sign must appear in a translated message. |
@@ -195,13 +198,14 @@ string is used directly and the children are discarded.
 | **Unclosed tag** `<` without `>` | The malformed tag is treated as **literal text** in the output. |
 | **Unbalanced tags** `<b>text` without `</b>` | **Throws** `Error` with an "unbalanced tags" message. |
 | **Improperly nested tags** `<a><b>text</a></b>` | **Throws** `Error` with an "unbalanced tags" message. |
-| **Tag with attributes** `<a class="link">` | **Throws** `Error` with a "Tags should not have attributes" message. |
+| **Tag with attributes** `<a class="link">` | **Throws** `Error** with a "Tags should not have attributes" message. |
 | **Missing `params` key** for a placeholder, tag, or void tag | **Throws** `Error` with a "value was not provided" message in the formatter. |
 | **Void tag with a function** in `params` | **Throws** `Error` (void tags only accept strings). |
 | **Default tags** (`<b>`, `<p>`, `<strong>`, `<tt>`, `<s>`, `<i>`) | Built in — no explicit `params` needed. Can be overridden via the `defaults` parameter. |
 | **Nested tags** | Tags can contain other tags. The inner tag's render function receives the already-rendered outer content. |
 | **`count` in `getPlural()`** | The `count` parameter is automatically set to the numeric `number` argument. Any user-supplied `params.count` is overridden. |
-| **Empty zero form** in plural strings | If the first form (before the first `|`) is omitted, the zero form returns an empty string. |
+| **Empty zero form** in plural strings | If the first form (before the first `\|`) is omitted, the zero form returns an empty string. |
+<!-- markdownlint-enable MD013 MD056 -->
 
 ---
 

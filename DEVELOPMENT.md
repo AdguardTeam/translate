@@ -31,12 +31,16 @@
 
 ### Required Tools
 
+<!-- markdownlint-disable MD013 -->
 | Tool | Minimum Version | How to Check |
 |---|---|---|
 | **Node.js** | 14.x (CI uses 22.17) | `node --version` |
 | **Yarn** | 1.x (classic) | `yarn --version` |
+<!-- markdownlint-enable MD013 -->
 
+<!-- markdownlint-disable MD013 -->
 This project uses **Yarn Classic** as its package manager. Yarn 2+ (Berry) is not supported — make sure you are running Yarn 1.x:
+<!-- markdownlint-enable MD013 -->
 
 ```bash
 yarn --version
@@ -71,7 +75,9 @@ cd ext-translate
 yarn install
 ```
 
+<!-- markdownlint-disable MD013 -->
 This installs all dev dependencies (TypeScript, Rollup, Jest, ESLint, etc.). There are no runtime dependencies — the library is self-contained.
+<!-- markdownlint-enable MD013 -->
 
 ### Verify the Setup
 
@@ -88,6 +94,7 @@ All three commands should pass without errors.
 ### Branching Strategy
 
 1. Create a feature branch from `master`:
+
    ```bash
    git checkout master
    git pull origin master
@@ -97,6 +104,7 @@ All three commands should pass without errors.
 2. Make changes and commit using conventional commit messages.
 
 3. Before pushing, run the full check suite:
+
    ```bash
    yarn lint && yarn test && yarn build
    ```
@@ -105,10 +113,12 @@ All three commands should pass without errors.
 
 ### Code Style
 
-Code style is enforced by ESLint with the TypeScript plugin. The configuration is in `.eslintrc.js`:
+Code style is enforced by ESLint with the TypeScript plugin.
+The configuration is in `.eslintrc.js`:
 
 - Parser: `@typescript-eslint/parser`
-- Extends: `eslint:recommended` and `plugin:@typescript-eslint/recommended`
+- Extends: `eslint:recommended` and
+  `plugin:@typescript-eslint/recommended`
 
 Run the linter:
 
@@ -116,9 +126,11 @@ Run the linter:
 yarn lint
 ```
 
-The linter checks all files in `src/` and `tests/`. There is no auto-fix configuration — fix issues manually.
+The linter checks all files in `src/` and `tests/`. There is no auto-fix
+configuration — fix issues manually.
 
-For code guidelines and naming conventions, see [AGENTS.md](./AGENTS.md).
+For code guidelines and naming conventions, see
+[AGENTS.md](./AGENTS.md).
 
 ### Running Tests
 
@@ -145,18 +157,19 @@ npx jest --watch
 ```
 
 Jest configuration is in `jest.config.ts`:
+
 - Environment: `node`
 - Coverage: enabled, output to `coverage/`
 
 ### Building
 
-The build produces three outputs in `dist/`:
-
+<!-- markdownlint-disable MD013 -->
 | Output | Path | Format |
 |---|---|---|
 | CJS bundle | `dist/index.js` | CommonJS |
 | ESM bundle | `dist/index.esm.js` | ES Module |
 | Type declarations | `dist/types/index.d.ts` | TypeScript declarations |
+<!-- markdownlint-enable MD013 -->
 
 Run the build:
 
@@ -165,11 +178,13 @@ yarn build
 ```
 
 The build uses Rollup with the following plugins:
+
 - `@wessberg/rollup-plugin-ts` — TypeScript compilation via Babel
 - `@rollup/plugin-commonjs` — CommonJS module resolution
 - `@rollup/plugin-node-resolve` — Node module resolution
 
-The TypeScript compilation transpiles to ES5 for maximum browser compatibility.
+The TypeScript compilation transpiles to ES5 for maximum browser
+compatibility.
 
 ### Generating Documentation
 
@@ -185,17 +200,21 @@ Output is written to `docs/`. Open `docs/index.html` in a browser to view it.
 
 ### Adding a New Locale
 
+<!-- markdownlint-disable MD013 MD029 -->
 1. Add the locale code to the `Locale` type in `src/plural.ts`.
 2. Add the locale's plural rules to the `PLURALS` map in the same file.
 3. Add a test case in `tests/validator.test.ts` or `tests/translate.test.ts` to verify the new locale's plural forms.
+<!-- markdownlint-enable MD013 MD029 -->
 
 ### Adding a Plugin (Framework Integration)
 
+<!-- markdownlint-disable MD013 MD029 -->
 1. Create a new file in `src/plugins/` (e.g., `src/plugins/vue.ts`).
 2. Implement a factory function following the pattern in `src/plugins/react.ts` — it should call `createTranslator` with an appropriate `messageConstructor`.
 3. Export the factory from `src/translate.ts`.
 4. Add the export to `index.ts`.
 5. Add a test in `tests/translate.test.ts`.
+<!-- markdownlint-enable MD013 MD029 -->
 
 ### Bumping the Version
 
@@ -203,9 +222,12 @@ Output is written to `docs/`. Open `docs/index.html` in a browser to view it.
 yarn increment
 ```
 
+<!-- markdownlint-disable MD013 -->
 This bumps the patch version in `package.json` without creating a git tag. For minor or major version bumps, update `package.json` manually.
+<!-- markdownlint-enable MD013 -->
 
-After bumping, add an entry to `CHANGELOG.md` following the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+After bumping, add an entry to `CHANGELOG.md` following the
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
 
 ### Running the Full CI Pipeline Locally
 
@@ -227,14 +249,22 @@ The artifact `translate.tgz` will be in the `out/` directory.
 
 ## Project Structure
 
-```
+```text
 .
+<!-- markdownlint-disable MD013 -->
 ├── index.ts                  # Public API: re-exports Translator, translate, validator, Locale
+<!-- markdownlint-enable MD013 -->
 ├── src/
 │   ├── Translator.ts         # Core Translator class with getMessage() and getPlural()
+<!-- markdownlint-disable MD013 -->
 │   ├── translate.ts          # Factory functions: createTranslator, createReactTranslator, createPreactTranslator
+<!-- markdownlint-enable MD013 -->
+<!-- markdownlint-disable MD013 -->
 │   ├── formatter.ts          # Formats messages with placeholder substitution and tag processing
+<!-- markdownlint-enable MD013 -->
+<!-- markdownlint-disable MD013 -->
 │   ├── parser.ts             # Parses message strings into AST nodes
+<!-- markdownlint-enable MD013 -->
 │   ├── nodes.ts              # AST node type definitions
 │   ├── plural.ts             # Locale type, plural form selection logic
 │   ├── validator.ts          # Translation validation: isTranslationValid, isPluralFormValid
@@ -264,8 +294,10 @@ The artifact `translate.tgz` will be in the `out/` directory.
 ### Build Fails with Type Errors
 
 1. Run `yarn lint` first — many type errors are caught by ESLint.
-2. Check that you're on a compatible Node.js version: `node --version` (≥14 required).
+2. Check that you're on a compatible Node.js version:
+   `node --version` (≥14 required).
 3. Clear caches and rebuild:
+
    ```bash
    rm -rf dist node_modules
    yarn install
@@ -275,10 +307,13 @@ The artifact `translate.tgz` will be in the `out/` directory.
 ### Tests Fail After Dependency Changes
 
 1. Clear Jest's cache:
+
    ```bash
    npx jest --clearCache
    ```
+
 2. Reinstall dependencies and retry:
+
    ```bash
    rm -rf node_modules
    yarn install
@@ -287,15 +322,24 @@ The artifact `translate.tgz` will be in the `out/` directory.
 
 ### ESLint Errors
 
-- ESLint configuration extends `plugin:@typescript-eslint/recommended`, which enforces strict TypeScript rules.
-- If you encounter `no-explicit-any`, use `// eslint-disable-next-line @typescript-eslint/no-explicit-any` only when `any` is truly unavoidable (e.g., generic constraints in the constructor).
+<!-- markdownlint-disable MD013 -->
+- ESLint configuration extends
+  `plugin:@typescript-eslint/recommended`, which enforces strict
+  TypeScript rules.
+- If you encounter `no-explicit-any`, use
+  `// eslint-disable-next-line @typescript-eslint/no-explicit-any`
+  only when `any` is truly unavoidable (e.g., generic constraints in
+  the constructor).
+<!-- markdownlint-enable MD013 -->
 - The linter does not auto-fix — resolve each issue manually.
 
 ## Additional Resources
 
+<!-- markdownlint-disable MD013 -->
 - [README.md](./README.md) — User-facing documentation and API reference
 - [AGENTS.md](./AGENTS.md) — Code guidelines for LLM agents and contributors
 - [CHANGELOG.md](./CHANGELOG.md) — Release history
 - [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — Changelog format used by this project
 - [Semantic Versioning](https://semver.org/spec/v2.0.0.html) — Versioning scheme
 - [Plural Forms Reference](https://github.com/translate/l10n-guide/blob/master/docs/l10n/pluralforms.rst) — Unicode CLDR plural rules
+<!-- markdownlint-enable MD013 -->

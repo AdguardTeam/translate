@@ -175,7 +175,9 @@ Layered architecture:
 | **Parser** | Message string → AST | `src/parser.ts` |
 | **Formatter** | AST → rendered output | `src/formatter.ts` |
 | **Translator** | Core i18n orchestration | `src/Translator.ts` |
+<!-- markdownlint-disable MD013 -->
 | **Factory / Plugins** | Convenience constructors; framework integrations | `src/translate.ts`, `src/plugins/react.ts`, `src/plugins/preact.ts` |
+<!-- markdownlint-enable MD013 -->
 | **Validation** | Cross-cutting translation validation | `src/validator.ts` |
 
 Dependency flow:
