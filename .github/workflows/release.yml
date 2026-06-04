@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+# For Trusted Publishing
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: team-extensions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build release artifacts
+        run: |
+          DOCKER_BUILDKIT=1 docker build --progress plain --target build-output --output ./artifacts .
+          ls -la ./artifacts/
+
+      - name: Upload npm package
+        uses: actions/upload-artifact@v7
+        with:
+          name: npm-package
+          path: artifacts/translate.tgz
+
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-latest
+    # Trusted publishing requires npm CLI version 11.5.1 or later
+    # and Node version 22.14.0 or higher.
+    container: node:24
+    environment: extensions
+    steps:
+      - name: Download npm package
+        uses: actions/download-artifact@v8
+        with:
+          name: npm-package
+          path: .
+
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org/
+
+      - name: Publish to npm
+        run: npm publish artifacts/translate.tgz --access public
+        env:
+          NPM_CONFIG_PROVENANCE: false

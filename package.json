@@ -8,8 +8,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AdguardTeam/translate.git"
+    "url": "git+https://github.com/AdGuardSoftwareLimited/ext-translate.git"
   },
+  "homepage": "https://github.com/AdguardTeam/translate#readme",
   "files": [
     "dist"
   ],
@@ -19,7 +20,6 @@
     "test": "jest",
     "lint": "eslint src tests",
     "increment": "yarn version --patch --no-git-tag-version",
-    "build-txt": "ts-node tools/build-txt",
     "docs": "typedoc --out docs src"
   },
   "devDependencies": {
