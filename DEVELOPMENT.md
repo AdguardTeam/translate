@@ -61,8 +61,8 @@ npm install -g yarn
 ### Clone the Repository
 
 ```bash
-git clone git@github.com:AdGuardSoftwareLimited/translate.git
-cd translate
+git clone git@github.com:AdGuardSoftwareLimited/ext-translate.git
+cd ext-translate
 ```
 
 ### Install Dependencies

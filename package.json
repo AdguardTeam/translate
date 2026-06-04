@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/AdGuardSoftwareLimited/ext-translate.git"
   },
+  "homepage": "https://github.com/AdguardTeam/translate#readme",
   "files": [
     "dist"
   ],

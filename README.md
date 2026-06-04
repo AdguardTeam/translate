@@ -6,6 +6,11 @@
 
 ## Description
 
+> **Note:** This package is developed in
+> [AdGuardSoftwareLimited/ext-translate](https://github.com/AdGuardSoftwareLimited/ext-translate).
+> The [AdguardTeam/translate](https://github.com/AdguardTeam/translate)
+> repository is a public mirror.
+
 **AdGuard Translate** is a TypeScript internationalization library for
 AdGuard product developers building browser extensions and web applications.
 It provides a unified i18n layer across AdGuard products, solving the
