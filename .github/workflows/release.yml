@@ -42,10 +42,15 @@ jobs:
           name: npm-package
           path: .
 
+      - name: Debug artifact contents
+        run: |
+          pwd
+          ls -laR
+
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
 
-      - name: Publish to npm
-        run: npm publish artifacts/translate.tgz --access public
+      - name: Publish to npm (dry-run)
+        run: npm publish translate.tgz --access public --dry-run
         env:
           NPM_CONFIG_PROVENANCE: false
