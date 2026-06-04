@@ -33,7 +33,7 @@
 
 | Tool | Minimum Version | How to Check |
 |---|---|---|
-| **Node.js** | 10.x (CI uses 22.17) | `node --version` |
+| **Node.js** | 14.x (CI uses 22.17) | `node --version` |
 | **Yarn** | 1.x (classic) | `yarn --version` |
 
 This project uses **Yarn Classic** as its package manager. Yarn 2+ (Berry) is not supported — make sure you are running Yarn 1.x:
