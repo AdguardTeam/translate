@@ -18,7 +18,7 @@ jobs:
 
       - name: Build release artifacts
         run: |
-          docker build --progress plain --target build-output --output ./artifacts .
+          DOCKER_BUILDKIT=1 docker build --progress plain --target build-output --output ./artifacts .
           ls -la ./artifacts/
 
       - name: Upload npm package

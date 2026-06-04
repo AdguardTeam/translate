@@ -19,4 +19,4 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Build and test via Docker
-        run: docker build --progress plain --target test-output .
+        run: DOCKER_BUILDKIT=1 docker build --progress plain --target test-output .
