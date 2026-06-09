@@ -167,10 +167,11 @@ jobs:
     name: Notify
     needs: release
     if: needs.release.result == 'success'
-    uses: AdGuardSoftwareLimited/actions/.github/workflows/slack-build-notify.yml@master
-    with:
-      team: extensions
-      channel: '#adguard-extension-vcs'
-      product: '@adguard/translate'
-      version-title: v${{ needs.tag.outputs.version }}
-      message: 'published to npm'
+    runs-on: team-extensions
+    steps:
+      - name: Send Slack notification
+        uses: AdGuardSoftwareLimited/actions/actions/slack@master
+        with:
+          channel: '#adguard-extension-vcs'
+          message: ':white_check_mark: *@adguard/translate* *v${{ needs.tag.outputs.version }}* published to npm — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>'
+          color: good
