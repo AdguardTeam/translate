@@ -68,6 +68,10 @@ has zero runtime dependencies — it is fully self-contained.
 ├── babel.config.js           # Babel transpilation configuration
 ├── jest.config.ts            # Jest test configuration
 ├── .eslintrc.js              # ESLint configuration
+├── .github/
+│   └── workflows/
+│       ├── tag.yml           # Tag creation (auto-tag-semver reusable workflow)
+│       └── release.yml       # Tag-triggered release pipeline (build, publish, release)
 ├── Dockerfile                # Multi-stage CI build pipeline
 ├── README.md                 # Library documentation and usage examples
 ├── CHANGELOG.md              # Release history
@@ -81,8 +85,8 @@ has zero runtime dependencies — it is fully self-contained.
 | `yarn build` | Build CJS + ESM + type declarations via Rollup |
 | `yarn test` | Run Jest test suite with coverage |
 | `yarn lint` | Run ESLint on `src/` and `tests/` |
+| `yarn version:current` | Show current version from latest git tag |
 | `yarn docs` | Generate TypeDoc documentation in `docs/` |
-| `yarn increment` | Bump patch version (no git tag) |
 
 ## Contribution Instructions
 
@@ -109,9 +113,18 @@ has zero runtime dependencies — it is fully self-contained.
 - When making changes to the project structure, ensure the Project Structure
   section in `AGENTS.md` is updated and remains valid.
 
+- When modifying CI workflows, ensure both `tag.yml` and `release.yml` stay in
+  sync. The version is derived from git tags (not `package.json`).
+
+- Never change `package.json` version manually — it is `0.0.0` in source and
+  injected during CI from the git tag.
+
 - If the prompt essentially asks you to refactor or improve existing code,
   check if you can phrase it as a code guideline. If it is possible, add it
   to the relevant Code Guidelines section in `AGENTS.md`.
+
+- After completing the task you MUST verify that the code you have written
+  follows the Code Guidelines in this file.
 
 - After completing the task you MUST verify that the code you have written
   follows the Code Guidelines in this file.
@@ -310,8 +323,31 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
 - When changing build commands or project structure, update `AGENTS.md`
   (Project Structure and Build And Test Commands sections), `README.md`
   (if public API changes), and `DEVELOPMENT.md` (if local setup changes).
+- When modifying CI workflows, ensure both `tag.yml` and `release.yml`
+  stay in sync. The version is derived from git tags, not `package.json`.
 - The library has no secrets or hardcoded values — all locale-specific
   logic is in `src/plural.ts` and is statically defined.
+
+### Releases & CI/CD
+
+- **Version source**: The version is derived from git tags, not
+  `package.json`. The source `package.json` always has `"version": "0.0.0"`.
+- **Tag creation**: Use the `Tag` workflow (`tag.yml`) via
+  `workflow_dispatch` to create a new semver tag. It auto-increments the
+  latest tag using the `auto-tag-semver` reusable workflow.
+- **Release pipeline**: The `Release` workflow (`release.yml`) triggers
+  automatically on tag push (`v*`). It can also be triggered manually via
+  `workflow_dispatch` with a tag input.
+- **Version injection**: CI injects the tag version into `package.json`
+  before building, so the published npm package has the correct version.
+- **Workflow relationship**: `tag.yml` creates a tag → tag push triggers
+  `release.yml` → build → publish → release → notify. Both workflows can
+  also be triggered independently via `workflow_dispatch`.
+- **No manual version bumps**: Never change `package.json` version by hand.
+  Use the `Tag` workflow or create a tag via git CLI.
+- **Use `yarn version:current`**: To see the current version from the
+  latest tag, run `yarn version:current` (which runs
+  `git describe --tags --abbrev=0`).
 
 ### Markdown Formatting
 

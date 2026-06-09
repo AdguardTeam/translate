@@ -1,0 +1,21 @@
+name: Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment:
+        description: 'Version increment'
+        required: true
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/auto-tag-semver.yml@master
+    with:
+      team: extensions
+      increment: ${{ inputs.increment }}
