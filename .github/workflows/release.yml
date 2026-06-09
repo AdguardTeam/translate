@@ -2,7 +2,9 @@ name: Release
 
 on:
   push:
-    tags: ['v[0-9]*.[0-9]*.[0-9]*']
+    # Matches semver tags with optional pre-release suffix and/or build metadata.
+    # Examples: v2.0.8, v3.1.2-beta, v4.5.6+6.build.132, v1.0.0-rc.1, v5.0.0-nightly.3
+    tags: ['v[0-9]*.[0-9]*.[0-9]**']
   workflow_dispatch:
     inputs:
       tag:
@@ -33,11 +35,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Inject version into package.json
-        run: |
-          set -euo pipefail
-          VERSION="${{ needs.meta.outputs.version }}"
-          node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json')); p.version='$VERSION'; fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n')"
-          echo "Injected version: $(node -p "require('./package.json').version")"
+        run: ./scripts/inject-version.sh "${{ needs.meta.outputs.version }}"
 
       - name: Build and test via Docker
         run: DOCKER_BUILDKIT=1 docker build --progress plain --target test-output .
@@ -51,11 +49,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Inject version into package.json
-        run: |
-          set -euo pipefail
-          VERSION="${{ needs.meta.outputs.version }}"
-          node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json')); p.version='$VERSION'; fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n')"
-          echo "Injected version: $(node -p "require('./package.json').version")"
+        run: ./scripts/inject-version.sh "${{ needs.meta.outputs.version }}"
 
       - name: Build release artifacts
         run: |

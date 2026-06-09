@@ -72,6 +72,8 @@ has zero runtime dependencies — it is fully self-contained.
 │   └── workflows/
 │       ├── tag.yml           # Tag creation (auto-tag-semver reusable workflow)
 │       └── release.yml       # Tag-triggered release pipeline (build, publish, release)
+├── scripts/
+│       └── inject-version.sh    # Inject tag-derived version into package.json (CI helper)
 ├── Dockerfile                # Multi-stage CI build pipeline
 ├── README.md                 # Library documentation and usage examples
 ├── CHANGELOG.md              # Release history
