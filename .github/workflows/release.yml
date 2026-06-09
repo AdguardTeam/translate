@@ -3,6 +3,8 @@ name: Release
 on:
   workflow_dispatch:
 
+# `contents: write` — needed for git tag push (tag job) and gh release create (release job)
+# `id-token: write` — needed for npm trusted publishing via OIDC (publish job)
 permissions:
   contents: write
   id-token: write
