@@ -3,14 +3,61 @@ name: Release
 on:
   workflow_dispatch:
 
-# For Trusted Publishing
+# `contents: write` — needed for git tag push (tag job) and gh release create (release job)
+# `id-token: write` — needed for npm trusted publishing via OIDC (publish job)
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
+  tag:
+    name: Create tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Read version from package.json
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "Package version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check tag does not already exist
+        run: |
+          set -euo pipefail
+          if git rev-parse "refs/tags/v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "::error::Tag v${{ steps.version.outputs.version }} already exists"
+            exit 1
+          fi
+          echo "Tag v${{ steps.version.outputs.version }} is available"
+
+      - name: Create and push tag
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@adguard.com"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+
+  test:
+    name: Lint, test, build
+    needs: tag
+    runs-on: team-extensions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build and test via Docker
+        run: DOCKER_BUILDKIT=1 docker build --progress plain --target test-output .
+
   build:
     name: Build
+    needs: test
     runs-on: team-extensions
     steps:
       - name: Checkout
@@ -18,6 +65,7 @@ jobs:
 
       - name: Build release artifacts
         run: |
+          set -euo pipefail
           DOCKER_BUILDKIT=1 docker build --progress plain --target build-output --output ./artifacts .
           ls -la ./artifacts/
 
@@ -30,17 +78,35 @@ jobs:
   publish:
     name: Publish to npm
     needs: build
+    # Trusted Publishing requires a GH Hosted runner
     runs-on: ubuntu-latest
     # Trusted publishing requires npm CLI version 11.5.1 or later
     # and Node version 22.14.0 or higher.
     container: node:24
+    defaults:
+      run:
+        shell: bash
     environment: extensions
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
       - name: Download npm package
         uses: actions/download-artifact@v8
         with:
           name: npm-package
           path: .
+
+      - name: Verify tag matches package.json version
+        run: |
+          set -euo pipefail
+          TAG_VERSION="v${{ needs.tag.outputs.version }}"
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          if [ "${{ needs.tag.outputs.version }}" != "$PACKAGE_VERSION" ]; then
+            echo "::error::Tag version (${{ needs.tag.outputs.version }}) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+          echo "Version check passed: ${{ needs.tag.outputs.version }}"
 
       - name: Configure npm registry
         run: npm config set registry https://registry.npmjs.org/
@@ -49,3 +115,62 @@ jobs:
         run: npm publish translate.tgz --access public
         env:
           NPM_CONFIG_PROVENANCE: false
+
+  release:
+    name: Create GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Download npm package
+        uses: actions/download-artifact@v8
+        with:
+          name: npm-package
+          path: .
+
+      - name: Extract changelog section
+        run: |
+          set -euo pipefail
+          TAG_VERSION="${{ needs.tag.outputs.version }}"
+
+          # Locate the version header line number (e.g. "## 2.0.8" or "## 2.0.8 - 2025-12-12")
+          SECTION_START=$(grep -n "^## ${TAG_VERSION}\b" CHANGELOG.md | head -1 | cut -d: -f1)
+
+          if [ -n "$SECTION_START" ]; then
+            # Print lines after the version header, stopping at the next "## " header
+            tail -n +$((SECTION_START + 1)) CHANGELOG.md \
+              | sed '/^## /q' \
+              > /tmp/release-notes.md
+          fi
+
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "Release v${TAG_VERSION}" > /tmp/release-notes.md
+          fi
+
+          echo "=== Release notes ==="
+          cat /tmp/release-notes.md
+
+      - name: Create GitHub Release draft
+        run: |
+          set -euo pipefail
+          gh release create "v${{ needs.tag.outputs.version }}" \
+            translate.tgz \
+            --title "v${{ needs.tag.outputs.version }}" \
+            --notes-file /tmp/release-notes.md \
+            --draft
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  notify:
+    name: Notify
+    needs: release
+    if: needs.release.result == 'success'
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/slack-build-notify.yml@master
+    with:
+      team: extensions
+      channel: '#adguard-extension-vcs'
+      product: '@adguard/translate'
+      version-title: v${{ needs.tag.outputs.version }}
+      message: 'published to npm'

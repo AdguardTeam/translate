@@ -1,6 +1,6 @@
 {
   "name": "@adguard/translate",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
@@ -12,7 +12,10 @@
   },
   "homepage": "https://github.com/AdguardTeam/translate#readme",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "rollup -c",
