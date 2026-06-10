@@ -111,8 +111,8 @@ Jobs (sequential, each depends on the previous):
 | `release` | `team-extensions` | Extract changelog section, create GitHub Release draft |
 | `notify` | `team-extensions` (shared action) | Slack notification |
 
-**Version injection**: The source `package.json` always has `"version": "0.0.0"`.
-CI injects the tag-derived version via `scripts/inject-version.js` before
+**Version injection**: The source `package.json` has no `version` field.
+CI injects the tag-derived version via `npm pkg set version=X` before
 building.
 
 ## Release Process
