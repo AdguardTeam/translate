@@ -7,7 +7,8 @@
   - [npm Registry](#npm-registry)
   - [GitHub Releases](#github-releases)
 - [CI/CD Workflows](#cicd-workflows)
-  - [Build (`build.yml`)](#build-buildyml)
+  - [Create Release PR (`tag.yml`)](#create-release-pr-tagyml)
+  - [Tag from Changelog (`tag-from-changelog.yml`)](#tag-from-changelog-tag-from-changelogyml)
   - [Release (`release.yml`)](#release-releaseyml)
 - [Release Process](#release-process)
   - [Step-by-Step](#step-by-step)
@@ -22,8 +23,9 @@
 Release**. There is no server, database, or runtime infrastructure — the
 library is consumed by other packages via the npm registry.
 
-All deployment is automated through a single GitHub Actions workflow. The
-only manual step is clicking a button to start the release.
+Deployment is automated through three GitHub Actions workflows. The release
+process is triggered by manually creating a release PR, which then auto-tags
+and publishes after merge.
 
 ## Publishing Destinations
 
@@ -53,37 +55,65 @@ GitHub runner, which makes the provenance attestation unavailable.
 
 All workflows live in `.github/workflows/`.
 
-### Build (`build.yml`)
+### Create Release PR (`tag.yml`)
 
-Runs on every push to `master`, every PR, and every tag push.
+Manually triggered workflow that opens a release pull request.
 
 | Trigger | Purpose |
 |---|---|
-| `push: branches: [master]` | CI gate on merge |
-| `pull_request: branches: ['*']` | PR validation |
+| `workflow_dispatch` | Manual trigger with tag input (e.g., `v2.0.8`) |
 
-Steps: **lint → test → build** (via `docker build --target test-output`).
+Calls the shared `create-release-pr.yml` workflow from
+`AdGuardSoftwareLimited/actions` which:
+
+1. Validates the tag and resolves version metadata via `version-metadata.yml`
+2. Patches `CHANGELOG.md` — resets `[Unreleased]`, creates a new version
+   section with previously-unreleased entries, updates reference links
+3. Commits the changelog on a `release-bump/v{version}` branch
+4. Opens a PR (attributed to the Octopass app via Octopass token)
+
+**No tags are created by this workflow** — it only opens a PR.
+
+### Tag from Changelog (`tag-from-changelog.yml`)
+
+Automatically triggered when a release PR is merged.
+
+| Trigger | Purpose |
+|---|---|
+| `pull_request: [closed]` | Fires when a PR is merged |
+| Condition: PR merged AND head branch starts with `release-bump/` | Only for release PRs |
+
+Calls the shared `tag-from-changelog.yml` workflow from
+`AdGuardSoftwareLimited/actions` which:
+
+1. Parses `CHANGELOG.md` for the latest released version
+2. Creates the matching `v{version}` tag on the merge commit
+
+**This tag push triggers `release.yml`.**
 
 ### Release (`release.yml`)
 
-Single, manually triggered workflow that handles the entire release:
-tagging, publishing, and notifications.
+Triggered automatically on tag push or manually for re-runs.
 
 | Trigger | Purpose |
 |---|---|
-| `workflow_dispatch` | Manual button (Actions → Release → Run workflow) |
-| **No inputs** | Version is read automatically from `package.json` |
+| `push: tags: ['v[0-9]+.[0-9]+.[0-9]+*']` | Auto-trigger on tag push |
+| `workflow_dispatch` with tag input | Manual re-run of failed release |
 
 Jobs (sequential, each depends on the previous):
 
 | Job | Runner | Purpose |
 |---|---|---|
-| `tag` | `ubuntu-latest` | Read version, create & push `v<version>` |
-| `test` | `team-extensions` | Lint, test, build via Docker |
-| `build` | `team-extensions` | Package `translate.tgz` |
-| `publish` | `ubuntu-latest` (container: `node:24`) | Verify tag ↔ `package.json`, publish to npm |
-| `release` | `ubuntu-latest` | Extract changelog, create GitHub Release draft |
-| `notify` | `team-extensions` (shared workflow) | Slack notification |
+| `meta` | `team-extensions` (shared workflow) | Resolve version metadata from tag |
+| `test` | `team-extensions` | Inject version, lint, test, build via Docker |
+| `build` | `team-extensions` | Inject version, package `translate.tgz` |
+| `publish` | `ubuntu-latest` (container: `node:24`) | Publish to npm via trusted publishing |
+| `release` | `team-extensions` | Extract changelog section, create GitHub Release draft |
+| `notify` | `team-extensions` (shared action) | Slack notification |
+
+**Version injection**: The source `package.json` always has `"version": "0.0.0"`.
+CI injects the tag-derived version via `scripts/inject-version.sh` before
+building.
 
 ## Release Process
 
@@ -91,20 +121,30 @@ Jobs (sequential, each depends on the previous):
 
 | # | Who | Action |
 |---|-----|--------|
-| 1 | Developer | Bump version in `package.json`, update `CHANGELOG.md`, open a PR |
-| 2 | Reviewer | Merge the PR into `master` |
-| 3 | Developer | Go to **Actions → Release → Run workflow** (no inputs needed) |
-| 4 | CI | Tag → lint → test → build → npm publish → GitHub Release draft → Slack |
-| 5 | Developer | Review the draft release and click **Publish** |
+| 1 | Developer | Go to **Actions → Create Release PR → Run workflow**, enter tag (e.g., `v2.0.8`) |
+| 2 | CI | Opens PR: `release-bump/v2.0.8` → `master` with finalized `CHANGELOG.md` |
+| 3 | Reviewer | Review the PR body (shows changelog section), approve, merge |
+| 4 | CI | `tag-from-changelog.yml` auto-fires, creates tag `v2.0.8` on merge commit |
+| 5 | CI | Tag push triggers `release.yml`: inject → lint → test → build → npm publish → GitHub Release draft → Slack |
+| 6 | Developer | Review the draft release and click **Publish** |
 <!-- markdownlint-disable MD029 -->
 
 ### Pipeline Stages
 
 ```text
-Release (manual button)
+Create Release PR (manual)
      │
      ▼
-  tag ──► test ──► build ──► publish ──► release ──► notify
+  PR opens (CHANGELOG finalized)
+     │
+     ▼
+  Merge PR
+     │
+     ▼
+  Auto-tag (from CHANGELOG)
+     │
+     ▼
+  meta → test → build → publish → release → notify
 ```
 <!-- markdownlint-enable MD029 -->
 
@@ -125,7 +165,7 @@ publishing.
 ## Notifications
 
 Successful releases post to Slack via the shared
-`slack-build-notify.yml` workflow.
+`AdGuardSoftwareLimited/actions/actions/slack` action.
 
 | Parameter | Value |
 |---|---|
@@ -138,12 +178,16 @@ Slack is unreachable.
 
 ## Troubleshooting
 
-**Release pipeline fails with "Tag version does not match"**
+**Release pipeline fails with "No released version found in CHANGELOG.md"**
 
-The tag version and `package.json#version` must be identical. The tag is
-always created from `package.json`, so this failure typically means the
-checkout is stale — ensure the workflow is running from the latest
-`master`.
+The `tag-from-changelog.yml` workflow expects `CHANGELOG.md` to follow
+keepachangelog format with bracket version headings (`## [X.Y.Z] - date`).
+Ensure the latest version heading matches this format.
+
+**Tag creation fails**
+
+Check that `CHANGELOG.md` has a `## [Unreleased]` section at the top. The
+`create-release-pr` workflow requires this to finalize the changelog.
 
 **npm publish fails**
 
@@ -154,6 +198,12 @@ for `AdGuardSoftwareLimited/ext-translate`.
 **GitHub Release draft is empty**
 
 The release notes are extracted from `CHANGELOG.md`. Ensure the heading
-matches the version number exactly (e.g. `## 2.0.8` or
-`## 2.0.8 - 2026-06-08`). If no matching heading is found, the body
+matches the version number exactly in bracket format (e.g., `## [2.0.8]`
+or `## [2.0.8] - 2026-06-08`). If no matching heading is found, the body
 defaults to `"Release v2.0.8"`.
+
+**Re-running a failed release**
+
+If `release.yml` fails after the tag was created, go to
+**Actions → Release → Run workflow** and enter the tag (e.g., `v2.0.8`).
+This manually triggers the release pipeline without re-creating the tag.

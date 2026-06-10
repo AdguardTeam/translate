@@ -4,7 +4,7 @@ on:
   push:
     # Matches semver tags with optional pre-release suffix and/or build metadata.
     # Examples: v2.0.8, v3.1.2-beta, v4.5.6+6.build.132, v1.0.0-rc.1, v5.0.0-nightly.3
-    tags: ['v[0-9]*.[0-9]*.[0-9]**']
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
   workflow_dispatch:
     inputs:
       tag:
@@ -112,8 +112,8 @@ jobs:
           set -euo pipefail
           TAG_VERSION="${{ needs.meta.outputs.version }}"
 
-          # Locate the version header line number (e.g. "## 2.0.8" or "## 2.0.8 - 2025-12-12")
-          SECTION_START=$(grep -n "^## ${TAG_VERSION}\b" CHANGELOG.md | head -1 | cut -d: -f1)
+          # Locate the version header line number (e.g. "## [2.0.8]" or "## [2.0.8] - 2025-12-12")
+          SECTION_START=$(grep -n "^## \[${TAG_VERSION}\]" CHANGELOG.md | head -1 | cut -d: -f1)
 
           if [ -n "$SECTION_START" ]; then
             # Print lines after the version header, stopping at the next "## " header

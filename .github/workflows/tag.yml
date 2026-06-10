@@ -1,21 +1,31 @@
-name: Tag
+name: Create Release PR
+
+# Opens a release pull request that finalizes the changelog:
+#   1. Validates the requested tag and resolves version metadata.
+#   2. Patches CHANGELOG.md — resets [Unreleased], opens a new version
+#      section with the previously-unreleased entries, and updates
+#      reference links.
+#   3. Commits the changelog on a release-bump/v{version} branch and
+#      opens a PR (attributed to the Octopass app).
+#
+# After the PR is merged, tag-from-changelog.yml tags the merge commit
+# and the tag push triggers release.yml.
 
 on:
   workflow_dispatch:
     inputs:
-      increment:
-        description: 'Version increment'
+      tag:
+        description: 'Release tag WITH "v" prefix (e.g. v2.0.8, v2.0.8-beta.1)'
         required: true
-        default: 'patch'
-        type: choice
-        options: [patch, minor, major]
+        type: string
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
-  tag:
-    uses: AdGuardSoftwareLimited/actions/.github/workflows/auto-tag-semver.yml@master
+  create-release-pr:
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/create-release-pr.yml@master
     with:
+      tag: ${{ inputs.tag }}
       team: extensions
-      increment: ${{ inputs.increment }}
