@@ -74,7 +74,7 @@ has zero runtime dependencies — it is fully self-contained.
 │       ├── tag-from-changelog.yml  # Auto-tag on release PR merge (tag-from-changelog)
 │       └── release.yml       # Tag-triggered release pipeline (build, publish, release)
 ├── scripts/
-│       └── inject-version.sh    # Inject tag-derived version into package.json (CI helper)
+│       └── inject-version.js    # Inject tag-derived version into package.json (CI helper)
 ├── Dockerfile                # Multi-stage CI build pipeline
 ├── README.md                 # Library documentation and usage examples
 ├── CHANGELOG.md              # Release history
@@ -353,7 +353,7 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
   `workflow_dispatch` with a tag input (useful for re-running a failed
   release).
 - **Version injection**: CI injects the tag version into `package.json`
-  via `scripts/inject-version.sh` before building, so the published npm
+  via `scripts/inject-version.js` before building, so the published npm
   package has the correct version.
 - **No manual version bumps**: Never change `package.json` version by hand.
   Use the `Create Release PR` workflow to start a release.

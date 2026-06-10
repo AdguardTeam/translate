@@ -112,7 +112,7 @@ Jobs (sequential, each depends on the previous):
 | `notify` | `team-extensions` (shared action) | Slack notification |
 
 **Version injection**: The source `package.json` always has `"version": "0.0.0"`.
-CI injects the tag-derived version via `scripts/inject-version.sh` before
+CI injects the tag-derived version via `scripts/inject-version.js` before
 building.
 
 ## Release Process
