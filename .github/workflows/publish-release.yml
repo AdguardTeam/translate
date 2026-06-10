@@ -1,15 +1,25 @@
-name: Release
+name: Publish release
+
+# Tags the merge commit of a release PR and runs the full release
+# pipeline:
+#   1. Parses CHANGELOG.md for the latest released version and creates
+#      the matching v{version} tag (via the shared tag-from-changelog
+#      workflow).
+#   2. Resolves version metadata from the tag.
+#   3. Lints, tests, and builds the library via Docker.
+#   4. Publishes the npm package via trusted publishing.
+#   5. Creates a GitHub Release draft with release notes from
+#      CHANGELOG.md.
+#   6. Sends a Slack notification.
 
 on:
-  push:
-    # Matches semver tags with optional pre-release suffix and/or build metadata.
-    # Examples: v2.0.8, v3.1.2-beta, v4.5.6+6.build.132, v1.0.0-rc.1, v5.0.0-nightly.3
-    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+  pull_request_target:
+    types: [closed]
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to release (e.g. v2.0.8)'
-        required: true
+      ref:
+        description: Ref to publish manually
+        required: false
         type: string
 
 # `contents: write` — needed for gh release create (release job)
@@ -19,20 +29,29 @@ permissions:
   id-token: write
 
 jobs:
+  tag:
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/tag-from-changelog.yml@master
+    with:
+      ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
+      team: extensions
+
   meta:
     name: Version metadata
+    needs: tag
     uses: AdGuardSoftwareLimited/actions/.github/workflows/version-metadata.yml@master
     with:
       team: extensions
-      tag: ${{ inputs.tag || github.ref_name }}
+      tag: ${{ needs.tag.outputs.tag }}
 
   test:
     name: Lint, test, build
-    needs: meta
+    needs: [tag, meta]
     runs-on: team-extensions
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Inject version into package.json
         run: npm pkg set version="${{ needs.meta.outputs.version }}"
@@ -42,11 +61,13 @@ jobs:
 
   build:
     name: Build
-    needs: [meta, test]
+    needs: [tag, meta, test]
     runs-on: team-extensions
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Inject version into package.json
         run: npm pkg set version="${{ needs.meta.outputs.version }}"
@@ -65,7 +86,7 @@ jobs:
 
   publish:
     name: Publish to npm
-    needs: [meta, build]
+    needs: [tag, meta, build]
     # Trusted Publishing requires a GH Hosted runner
     runs-on: ubuntu-latest
     # Trusted publishing requires npm CLI version 11.5.1 or later
@@ -78,6 +99,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Download npm package
         uses: actions/download-artifact@v8
@@ -95,11 +118,13 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [meta, publish]
+    needs: [tag, meta, publish]
     runs-on: team-extensions
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Download npm package
         uses: actions/download-artifact@v8
@@ -142,7 +167,7 @@ jobs:
 
   notify:
     name: Notify
-    needs: [meta, release]
+    needs: [tag, meta, release]
     if: needs.release.result == 'success'
     runs-on: team-extensions
     steps:

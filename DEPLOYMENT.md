@@ -7,9 +7,8 @@
   - [npm Registry](#npm-registry)
   - [GitHub Releases](#github-releases)
 - [CI/CD Workflows](#cicd-workflows)
-  - [Create Release PR (`tag.yml`)](#create-release-pr-tagyml)
-  - [Tag from Changelog (`tag-from-changelog.yml`)](#tag-from-changelog-tag-from-changelogyml)
-  - [Release (`release.yml`)](#release-releaseyml)
+  - [Prepare Release (`prepare-release.yml`)](#prepare-release-prepare-releaseyml)
+  - [Publish Release (`publish-release.yml`)](#publish-release-publish-releaseyml)
 - [Release Process](#release-process)
   - [Step-by-Step](#step-by-step)
   - [Pipeline Stages](#pipeline-stages)
@@ -23,8 +22,8 @@
 Release**. There is no server, database, or runtime infrastructure — the
 library is consumed by other packages via the npm registry.
 
-Deployment is automated through three GitHub Actions workflows. The release
-process is triggered by manually creating a release PR, which then auto-tags
+Deployment is automated through two GitHub Actions workflows. The release
+process is triggered by manually creating a release PR, which then tags
 and publishes after merge.
 
 ## Publishing Destinations
@@ -55,7 +54,7 @@ GitHub runner, which makes the provenance attestation unavailable.
 
 All workflows live in `.github/workflows/`.
 
-### Create Release PR (`tag.yml`)
+### Prepare Release (`prepare-release.yml`)
 
 Manually triggered workflow that opens a release pull request.
 
@@ -74,36 +73,22 @@ Calls the shared `create-release-pr.yml` workflow from
 
 **No tags are created by this workflow** — it only opens a PR.
 
-### Tag from Changelog (`tag-from-changelog.yml`)
+### Publish Release (`publish-release.yml`)
 
-Automatically triggered when a release PR is merged.
-
-| Trigger | Purpose |
-|---|---|
-| `pull_request: [closed]` | Fires when a PR is merged |
-| Condition: PR merged AND head branch starts with `release-bump/` | Only for release PRs |
-
-Calls the shared `tag-from-changelog.yml` workflow from
-`AdGuardSoftwareLimited/actions` which:
-
-1. Parses `CHANGELOG.md` for the latest released version
-2. Creates the matching `v{version}` tag on the merge commit
-
-**This tag push triggers `release.yml`.**
-
-### Release (`release.yml`)
-
-Triggered automatically on tag push or manually for re-runs.
+Automatically triggered when a release PR is merged, or manually for
+re-runs. Handles tagging, building, testing, publishing, and release
+creation in a single workflow.
 
 | Trigger | Purpose |
 |---|---|
-| `push: tags: ['v[0-9]+.[0-9]+.[0-9]+*']` | Auto-trigger on tag push |
-| `workflow_dispatch` with tag input | Manual re-run of failed release |
+| `pull_request_target: [closed]` | Auto-fires when a PR is merged (condition checked inside shared workflow) |
+| `workflow_dispatch` with ref input | Manual re-run of failed release |
 
 Jobs (sequential, each depends on the previous):
 
 | Job | Runner | Purpose |
 |---|---|---|
+| `tag` | `team-extensions` (shared workflow) | Parse CHANGELOG, create `v{version}` tag |
 | `meta` | `team-extensions` (shared workflow) | Resolve version metadata from tag |
 | `test` | `team-extensions` | Inject version, lint, test, build via Docker |
 | `build` | `team-extensions` | Inject version, package `translate.tgz` |
@@ -121,18 +106,17 @@ building.
 
 | # | Who | Action |
 |---|-----|--------|
-| 1 | Developer | Go to **Actions → Create Release PR → Run workflow**, enter tag (e.g., `v2.0.8`) |
+| 1 | Developer | Go to **Actions → Prepare Release → Run workflow**, enter tag (e.g., `v2.0.8`) |
 | 2 | CI | Opens PR: `release-bump/v2.0.8` → `master` with finalized `CHANGELOG.md` |
 | 3 | Reviewer | Review the PR body (shows changelog section), approve, merge |
-| 4 | CI | `tag-from-changelog.yml` auto-fires, creates tag `v2.0.8` on merge commit |
-| 5 | CI | Tag push triggers `release.yml`: inject → lint → test → build → npm publish → GitHub Release draft → Slack |
-| 6 | Developer | Review the draft release and click **Publish** |
+| 4 | CI | `publish-release.yml` auto-fires: creates tag `v2.0.8` → inject → lint → test → build → npm publish → GitHub Release draft → Slack |
+| 5 | Developer | Review the draft release and click **Publish** |
 <!-- markdownlint-disable MD029 -->
 
 ### Pipeline Stages
 
 ```text
-Create Release PR (manual)
+Prepare Release (manual)
      │
      ▼
   PR opens (CHANGELOG finalized)
@@ -141,10 +125,10 @@ Create Release PR (manual)
   Merge PR
      │
      ▼
-  Auto-tag (from CHANGELOG)
+  Publish Release (auto)
      │
      ▼
-  meta → test → build → publish → release → notify
+  tag → meta → test → build → publish → release → notify
 ```
 <!-- markdownlint-enable MD029 -->
 
@@ -180,7 +164,7 @@ Slack is unreachable.
 
 **Release pipeline fails with "No released version found in CHANGELOG.md"**
 
-The `tag-from-changelog.yml` workflow expects `CHANGELOG.md` to follow
+The `publish-release.yml` workflow expects `CHANGELOG.md` to follow
 keepachangelog format with bracket version headings (`## [X.Y.Z] - date`).
 Ensure the latest version heading matches this format.
 
@@ -204,6 +188,6 @@ defaults to `"Release v2.0.8"`.
 
 **Re-running a failed release**
 
-If `release.yml` fails after the tag was created, go to
-**Actions → Release → Run workflow** and enter the tag (e.g., `v2.0.8`).
-This manually triggers the release pipeline without re-creating the tag.
+If `publish-release.yml` fails after the tag was created, go to
+**Actions → Publish Release → Run workflow** and enter the ref (e.g.,
+`v2.0.8` or a commit SHA). This manually triggers the release pipeline.

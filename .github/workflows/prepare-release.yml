@@ -1,4 +1,4 @@
-name: Create Release PR
+name: Prepare release
 
 # Opens a release pull request that finalizes the changelog:
 #   1. Validates the requested tag and resolves version metadata.
@@ -8,8 +8,8 @@ name: Create Release PR
 #   3. Commits the changelog on a release-bump/v{version} branch and
 #      opens a PR (attributed to the Octopass app).
 #
-# After the PR is merged, tag-from-changelog.yml tags the merge commit
-# and the tag push triggers release.yml.
+# After the PR is merged, publish-release.yml tags the merge commit
+# and runs the full release pipeline.
 
 on:
   workflow_dispatch:

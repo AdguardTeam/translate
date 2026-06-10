@@ -70,9 +70,9 @@ has zero runtime dependencies — it is fully self-contained.
 ├── .eslintrc.js              # ESLint configuration
 ├── .github/
 │   └── workflows/
-│       ├── tag.yml           # Release PR creation (create-release-pr reusable workflow)
-│       ├── tag-from-changelog.yml  # Auto-tag on release PR merge (tag-from-changelog)
-│       └── release.yml       # Tag-triggered release pipeline (build, publish, release)
+│       ├── prepare-release.yml   # Release PR creation (create-release-pr)
+│       ├── publish-release.yml   # Auto-tag + release pipeline (tag, build, publish)
+│       └── build.yml             # CI build and test on PRs
 ├── Dockerfile                # Multi-stage CI build pipeline
 ├── README.md                 # Library documentation and usage examples
 ├── CHANGELOG.md              # Release history
@@ -114,9 +114,9 @@ has zero runtime dependencies — it is fully self-contained.
 - When making changes to the project structure, ensure the Project Structure
   section in `AGENTS.md` is updated and remains valid.
 
-- When modifying CI workflows, ensure `tag.yml`, `tag-from-changelog.yml`,
-  and `release.yml` stay in sync. The version is derived from git tags (not
-  `package.json`).
+- When modifying CI workflows, ensure `prepare-release.yml` and
+  `publish-release.yml` stay in sync. The version is derived from git
+  tags (not `package.json`).
 
 - Never change `package.json` version manually — it is `0.0.0` in source and
   injected during CI from the git tag.
@@ -325,9 +325,9 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
 - When changing build commands or project structure, update `AGENTS.md`
   (Project Structure and Build And Test Commands sections), `README.md`
   (if public API changes), and `DEVELOPMENT.md` (if local setup changes).
-- When modifying CI workflows, ensure `tag.yml`, `tag-from-changelog.yml`,
-  and `release.yml` stay in sync. The version is derived from git tags (not
-  `package.json`).
+- When modifying CI workflows, ensure `prepare-release.yml` and
+  `publish-release.yml` stay in sync. The version is derived from git
+  tags (not `package.json`).
 - The library has no secrets or hardcoded values — all locale-specific
   logic is in `src/plural.ts` and is statically defined.
 
@@ -335,21 +335,20 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
 
 - **Version source**: The version is derived from git tags, not
   `package.json`. The source `package.json` always has `"version": "0.0.0"`.
-- **Release flow**: The release process follows three steps:
-    1. **Create release PR** — Trigger `tag.yml` via `workflow_dispatch`
-       with the desired tag (e.g. `v2.0.8`). This calls `create-release-pr`
-       which finalizes the `[Unreleased]` section in `CHANGELOG.md` and
-       opens a PR.
+- **Release flow**: The release process follows two steps:
+    1. **Create release PR** — Trigger `prepare-release.yml` via
+       `workflow_dispatch` with the desired tag (e.g. `v2.0.8`). This
+       calls `create-release-pr` which finalizes the `[Unreleased]`
+       section in `CHANGELOG.md` and opens a PR.
     2. **Merge the PR** — Review and merge the release PR. The
-       `tag-from-changelog.yml` workflow triggers automatically on merge,
-       reads the latest version from `CHANGELOG.md`, and creates the
-       matching `v{version}` tag on the merge commit.
-    3. **Release** — The tag push triggers `release.yml` which builds,
-       tests, publishes to npm, creates a GitHub Release draft, and sends
-       a Slack notification.
-- **Manual release**: `release.yml` can also be triggered manually via
-  `workflow_dispatch` with a tag input (useful for re-running a failed
-  release).
+       `publish-release.yml` workflow triggers automatically on merge,
+       reads the latest version from `CHANGELOG.md`, creates the
+       matching `v{version}` tag on the merge commit, builds, tests,
+       publishes to npm, creates a GitHub Release draft, and sends a
+       Slack notification.
+- **Manual release**: `publish-release.yml` can also be triggered
+  manually via `workflow_dispatch` with a ref input (useful for
+  re-running a failed release).
 - **Version injection**: CI injects the tag version into `package.json`
   via `npm pkg set version=X` before building, so the published npm
   package has the correct version.
