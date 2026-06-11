@@ -1,12 +1,6 @@
 name: Publish release
 
-description: >-
-  Tags the release commit, builds, tests, publishes to npm,
-  drafts a GitHub Release, and notifies Slack.
-
 on:
-  # `pull_request` is sufficient because release PRs are always
-  # internal (created by prepare-release.yml from a same-repo branch).
   pull_request:
     types: [closed]
     branches: [master]
@@ -17,8 +11,6 @@ on:
         required: false
         type: string
 
-# `contents: write` — needed for gh release create (release job)
-# `id-token: write` — needed for npm trusted publishing via OIDC (publish job)
 permissions:
   contents: write
   id-token: write
@@ -30,17 +22,9 @@ jobs:
       ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
       team: extensions
 
-  meta:
-    name: Version metadata
-    needs: tag
-    uses: AdGuardSoftwareLimited/actions/.github/workflows/version-metadata.yml@master
-    with:
-      team: extensions
-      tag: ${{ needs.tag.outputs.tag }}
-
   test:
     name: Lint, test, build
-    needs: [tag, meta]
+    needs: tag
     runs-on: team-extensions
     steps:
       - name: Checkout
@@ -49,14 +33,14 @@ jobs:
           ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Inject version into package.json
-        run: npm pkg set version="${{ needs.meta.outputs.version }}"
+        run: npm pkg set version="${{ needs.tag.outputs.version }}"
 
       - name: Build and test via Docker
         run: DOCKER_BUILDKIT=1 docker build --progress plain --target test-output .
 
   build:
     name: Build
-    needs: [tag, meta, test]
+    needs: [tag, test]
     runs-on: team-extensions
     steps:
       - name: Checkout
@@ -65,7 +49,7 @@ jobs:
           ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
       - name: Inject version into package.json
-        run: npm pkg set version="${{ needs.meta.outputs.version }}"
+        run: npm pkg set version="${{ needs.tag.outputs.version }}"
 
       - name: Build release artifacts
         run: |
@@ -80,95 +64,39 @@ jobs:
           path: artifacts/translate.tgz
 
   publish:
-    name: Publish to npm
-    needs: [tag, meta, build]
-    # Trusted Publishing requires a GH Hosted runner
-    runs-on: ubuntu-latest
-    # Trusted publishing requires npm CLI version 11.5.1 or later
-    # and Node version 22.14.0 or higher.
-    container: node:24
-    defaults:
-      run:
-        shell: bash
-    environment: extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
+    needs: build
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/deploy-to-npm.yml@master
+    with:
+      artifact-name: npm-package
+      package-file: translate.tgz
+      environment: extensions
+    permissions:
+      contents: read
+      id-token: write
 
-      - name: Download npm package
-        uses: actions/download-artifact@v8
-        with:
-          name: npm-package
-          path: .
-
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
-      - name: Publish to npm
-        run: npm publish translate.tgz --access public
-        env:
-          NPM_CONFIG_PROVENANCE: false
-
-  release:
-    name: Create GitHub Release
-    needs: [tag, meta, publish]
-    runs-on: team-extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
-
-      - name: Download npm package
-        uses: actions/download-artifact@v8
-        with:
-          name: npm-package
-          path: .
-
-      - name: Extract changelog section
-        run: |
-          set -euo pipefail
-          TAG_VERSION="${{ needs.meta.outputs.version }}"
-
-          # Locate the version header line number (e.g. "## [2.0.8]" or "## [2.0.8] - 2025-12-12")
-          SECTION_START=$(grep -n "^## \[${TAG_VERSION}\]" CHANGELOG.md | head -1 | cut -d: -f1)
-
-          if [ -n "$SECTION_START" ]; then
-            # Print lines after the version header, stopping at the next "## " header
-            tail -n +$((SECTION_START + 1)) CHANGELOG.md \
-              | sed '/^## /q' \
-              > /tmp/release-notes.md
-          fi
-
-          if [ ! -s /tmp/release-notes.md ]; then
-            echo "Release v${TAG_VERSION}" > /tmp/release-notes.md
-          fi
-
-          echo "=== Release notes ==="
-          cat /tmp/release-notes.md
-
-      - name: Create GitHub Release draft
-        uses: AdguardTeam/action-gh-release@master
-        with:
-          tag_name: v${{ needs.meta.outputs.version }}
-          name: v${{ needs.meta.outputs.version }}
-          body_path: /tmp/release-notes.md
-          draft: true
-          files: translate.tgz
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+  mirror-and-release:
+    needs: [tag, publish]
+    uses: AdGuardSoftwareLimited/actions/.github/workflows/mirror-and-release.yml@master
+    with:
+      team: extensions
+      target_repo: AdguardTeam/translate
+      tag: ${{ needs.tag.outputs.tag }}
+      changelog: ${{ needs.tag.outputs.changelog }}
+      artifact_name: npm-package
+    secrets: inherit
+    permissions:
+      contents: write
+      id-token: write
 
   notify:
     name: Notify
-    needs: [tag, meta, release]
-    if: needs.release.result == 'success'
+    needs: [tag, mirror-and-release]
+    if: needs.mirror-and-release.result == 'success'
     runs-on: team-extensions
     steps:
       - name: Send Slack notification
         uses: AdGuardSoftwareLimited/actions/actions/slack@master
         with:
           channel: '#adguard-extension-vcs'
-          message: ':white_check_mark: *@adguard/translate* *v${{ needs.meta.outputs.version }}* published to npm — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>'
+          message: ':white_check_mark: *@adguard/translate* *v${{ needs.tag.outputs.version }}* published to npm — <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|view run>'
           color: good

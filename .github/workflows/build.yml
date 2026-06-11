@@ -1,17 +1,7 @@
 name: Build
 
-description: >-
-  Lints, tests, and builds the library on PRs, master pushes, and version tags.
-
 on:
-  push:
-    tags:
-      - 'v*'
-    branches:
-      - master
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   test:
