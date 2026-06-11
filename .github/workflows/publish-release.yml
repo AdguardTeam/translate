@@ -22,8 +22,8 @@ jobs:
       ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
       team: extensions
 
-  test:
-    name: Lint, test, build
+  build:
+    name: Test and build
     needs: tag
     runs-on: team-extensions
     steps:
@@ -35,27 +35,11 @@ jobs:
       - name: Inject version into package.json
         run: npm pkg set version="${{ needs.tag.outputs.version }}"
 
-      - name: Build and test via Docker
+      - name: Lint and test
         run: DOCKER_BUILDKIT=1 docker build --progress plain --target test-output .
 
-  build:
-    name: Build
-    needs: [tag, test]
-    runs-on: team-extensions
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
-
-      - name: Inject version into package.json
-        run: npm pkg set version="${{ needs.tag.outputs.version }}"
-
       - name: Build release artifacts
-        run: |
-          set -euo pipefail
-          DOCKER_BUILDKIT=1 docker build --progress plain --target build-output --output ./artifacts .
-          ls -la ./artifacts/
+        run: DOCKER_BUILDKIT=1 docker build --progress plain --target build-output --output ./artifacts .
 
       - name: Upload npm package
         uses: actions/upload-artifact@v7
