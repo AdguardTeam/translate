@@ -1,20 +1,15 @@
 name: Publish release
 
-# Tags the merge commit of a release PR and runs the full release
-# pipeline:
-#   1. Parses CHANGELOG.md for the latest released version and creates
-#      the matching v{version} tag (via the shared tag-from-changelog
-#      workflow).
-#   2. Resolves version metadata from the tag.
-#   3. Lints, tests, and builds the library via Docker.
-#   4. Publishes the npm package via trusted publishing.
-#   5. Creates a GitHub Release draft with release notes from
-#      CHANGELOG.md.
-#   6. Sends a Slack notification.
+description: >-
+  Tags the release commit, builds, tests, publishes to npm,
+  drafts a GitHub Release, and notifies Slack.
 
 on:
-  pull_request_target:
+  # `pull_request` is sufficient because release PRs are always
+  # internal (created by prepare-release.yml from a same-repo branch).
+  pull_request:
     types: [closed]
+    branches: [master]
   workflow_dispatch:
     inputs:
       ref:

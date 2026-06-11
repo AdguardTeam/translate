@@ -1,15 +1,8 @@
 name: Prepare release
 
-# Opens a release pull request that finalizes the changelog:
-#   1. Validates the requested tag and resolves version metadata.
-#   2. Patches CHANGELOG.md — resets [Unreleased], opens a new version
-#      section with the previously-unreleased entries, and updates
-#      reference links.
-#   3. Commits the changelog on a release-bump/v{version} branch and
-#      opens a PR (attributed to the Octopass app).
-#
-# After the PR is merged, publish-release.yml tags the merge commit
-# and runs the full release pipeline.
+description: >-
+  Opens a release PR that finalizes CHANGELOG.md for the given tag.
+  After merge, publish-release.yml takes over.
 
 on:
   workflow_dispatch:
