@@ -6,21 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## 2.0.7 - 2026-06-08
+## [Unreleased]
 
 ### Fixed
 
 - Missing files in npm package.
 
 
-## 2.0.6 - 2026-06-04
+## [2.0.6] - 2026-06-04
 
 ### Changed
 
 - Repository URL updated.
 
 
-## 2.0.1 - 2025-12-12
+## [2.0.1] - 2025-12-12
 
 ### Changed
 
@@ -37,28 +37,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - More specific error logging of `getMessage()` and `getPluralForm()`.
 
 
-## 1.0.2 - 2023-09-26
+## [1.0.2] - 2023-09-26
 
 ### Changed
 
 - Improved `isTranslationValid()` and `isPluralFormValid()` methods.
 
 
-## 0.3.2 - 2023-08-23
+## [0.3.2] - 2023-08-23
 
 ### Added
 
 - Support for `sr_latn` locale.
 
 
-## 0.3.1 - 2023-08-23
+## [0.3.1] - 2023-08-23
 
 ### Added
 
 - `Locales` type exported for consumers to use in type annotations.
 
 
-## 0.3.0 - 2022-05-19
+## [0.3.0] - 2022-05-19
 
 ### Fixed
 
@@ -70,28 +70,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   instead of throwing for missing keys.
 
 
-## 0.2.6 - 2022-01-19
+## [0.2.6] - 2022-01-19
 
 ### Added
 
 - Preact integration via `createPreactTranslator()`.
 
 
-## 0.2.5 - 2021-10-06
+## [0.2.5] - 2021-10-06
 
 ### Added
 
 - `Translator` class exported for programmatic use in other libraries.
 
 
-## 0.2.4 - 2021-09-06
+## [0.2.4] - 2021-09-06
 
 ### Changed
 
 - Improved parser error logging for malformed translation strings.
 
 
-## 0.2.3 - 2021-06-16
+## [0.2.3] - 2021-06-16
 
 ### Added
 
@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   passed in `values`.
 
 
-## 0.2.2 - 2021-03-09
+## [0.2.2] - 2021-03-09
 
 ### Added
 
@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   attributes, preventing silent misrendering.
 
 
-## 0.2.1 - 2021-02-02
+## [0.2.1] - 2021-02-02
 
 ### Added
 
@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   forms.
 
 
-## 0.2.0 - 2021-01-19
+## [0.2.0] - 2021-01-19
 
 ### Added
 
@@ -130,7 +130,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   substitution via `params`.
 
 
-## 0.1.0 - 2021-01-14
+## [0.1.0] - 2021-01-14
 
 ### Added
 
@@ -144,4 +144,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   output.
 
 
-[unreleased]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/AdguardTeam/translate/compare/v2.0.7...HEAD
+[2.0.7]: https://github.com/AdguardTeam/translate/compare/v2.0.6...v2.0.7
+[2.0.6]: https://github.com/AdguardTeam/translate/compare/v2.0.1...v2.0.6
+[2.0.1]: https://github.com/AdguardTeam/translate/compare/v1.0.2...v2.0.1
+[1.0.2]: https://github.com/AdguardTeam/translate/compare/v0.3.2...v1.0.2
+[0.3.2]: https://github.com/AdguardTeam/translate/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/AdguardTeam/translate/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/AdguardTeam/translate/compare/v0.2.6...v0.3.0
+[0.2.6]: https://github.com/AdguardTeam/translate/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/AdguardTeam/translate/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/AdguardTeam/translate/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/AdguardTeam/translate/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/AdguardTeam/translate/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/AdguardTeam/translate/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/AdguardTeam/translate/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/AdguardTeam/translate/releases/tag/v0.1.0

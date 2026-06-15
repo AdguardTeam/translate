@@ -1,6 +1,5 @@
 {
   "name": "@adguard/translate",
-  "version": "2.0.7",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/types/index.d.ts",
@@ -22,8 +21,8 @@
     "prepublishOnly": "npm run build",
     "test": "jest",
     "lint": "eslint src tests",
-    "increment": "yarn version --patch --no-git-tag-version",
-    "docs": "typedoc --out docs src"
+    "docs": "typedoc --out docs src",
+    "version:current": "git describe --tags --abbrev=0 2>/dev/null || echo '0.0.0-dev'"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

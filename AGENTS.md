@@ -68,6 +68,11 @@ has zero runtime dependencies — it is fully self-contained.
 ├── babel.config.js           # Babel transpilation configuration
 ├── jest.config.ts            # Jest test configuration
 ├── .eslintrc.js              # ESLint configuration
+├── .github/
+│   └── workflows/
+│       ├── prepare-release.yml   # Release PR creation (create-release-pr)
+│       ├── publish-release.yml   # Auto-tag + release pipeline (tag, build, publish)
+│       └── build.yml             # CI build and test on PRs
 ├── Dockerfile                # Multi-stage CI build pipeline
 ├── README.md                 # Library documentation and usage examples
 ├── CHANGELOG.md              # Release history
@@ -81,8 +86,8 @@ has zero runtime dependencies — it is fully self-contained.
 | `yarn build` | Build CJS + ESM + type declarations via Rollup |
 | `yarn test` | Run Jest test suite with coverage |
 | `yarn lint` | Run ESLint on `src/` and `tests/` |
+| `yarn version:current` | Show current version from latest git tag |
 | `yarn docs` | Generate TypeDoc documentation in `docs/` |
-| `yarn increment` | Bump patch version (no git tag) |
 
 ## Contribution Instructions
 
@@ -109,9 +114,19 @@ has zero runtime dependencies — it is fully self-contained.
 - When making changes to the project structure, ensure the Project Structure
   section in `AGENTS.md` is updated and remains valid.
 
+- When modifying CI workflows, ensure `prepare-release.yml` and
+  `publish-release.yml` stay in sync. The version is derived from git
+  tags (not `package.json`).
+
+- Never change `package.json` version manually — it is `0.0.0` in source and
+  injected during CI from the git tag.
+
 - If the prompt essentially asks you to refactor or improve existing code,
   check if you can phrase it as a code guideline. If it is possible, add it
   to the relevant Code Guidelines section in `AGENTS.md`.
+
+- After completing the task you MUST verify that the code you have written
+  follows the Code Guidelines in this file.
 
 - After completing the task you MUST verify that the code you have written
   follows the Code Guidelines in this file.
@@ -310,8 +325,42 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
 - When changing build commands or project structure, update `AGENTS.md`
   (Project Structure and Build And Test Commands sections), `README.md`
   (if public API changes), and `DEVELOPMENT.md` (if local setup changes).
+- When modifying CI workflows, ensure `prepare-release.yml` and
+  `publish-release.yml` stay in sync. The version is derived from git
+  tags (not `package.json`).
 - The library has no secrets or hardcoded values — all locale-specific
   logic is in `src/plural.ts` and is statically defined.
+
+### Releases & CI/CD
+
+- **Version source**: The version is derived from git tags, not
+  `package.json`. The source `package.json` always has `"version": "0.0.0"`.
+- **Release flow**: The release process follows two steps:
+    1. **Create release PR** — Trigger `prepare-release.yml` via
+       `workflow_dispatch` with the desired tag (e.g. `v2.0.8`). This
+       calls `create-release-pr` which finalizes the `[Unreleased]`
+       section in `CHANGELOG.md` and opens a PR.
+    2. **Merge the PR** — Review and merge the release PR. The
+       `publish-release.yml` workflow triggers automatically on merge,
+       reads the latest version from `CHANGELOG.md`, creates the
+       matching `v{version}` tag on the merge commit, builds, tests,
+       publishes to npm, creates a GitHub Release draft, and sends a
+       Slack notification.
+- **Manual release**: `publish-release.yml` can also be triggered
+  manually via `workflow_dispatch` with a ref input (useful for
+  re-running a failed release).
+- **Version injection**: CI injects the tag version into `package.json`
+  via `npm pkg set version=X` before building, so the published npm
+  package has the correct version.
+- **No manual version bumps**: Never change `package.json` version by hand.
+  Use the `Create Release PR` workflow to start a release.
+- **Use `yarn version:current`**: To see the current version from the
+  latest tag, run `yarn version:current` (which runs
+  `git describe --tags --abbrev=0`).
+- **Changelog format**: `CHANGELOG.md` follows
+  [Keep a Changelog](https://keepachangelog.com/) with version headings
+  in bracket format (`## [X.Y.Z] - YYYY-MM-DD`). The `[Unreleased]`
+  section collects pending changes between releases.
 
 ### Markdown Formatting
 
