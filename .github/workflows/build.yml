@@ -1,7 +1,12 @@
 name: Build
 
+description: Lints, tests, and builds on pull requests and pushes to master.
+
 on:
   pull_request:
+  push:
+    branches:
+      - master
 
 jobs:
   test:

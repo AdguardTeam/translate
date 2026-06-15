@@ -144,19 +144,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   output.
 
 
-[Unreleased]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v2.0.7...HEAD
-[2.0.7]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v2.0.6...v2.0.7
-[2.0.6]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v2.0.1...v2.0.6
-[2.0.1]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v1.0.2...v2.0.1
-[1.0.2]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.3.2...v1.0.2
-[0.3.2]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.3.1...v0.3.2
-[0.3.1]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.6...v0.3.0
-[0.2.6]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.5...v0.2.6
-[0.2.5]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.4...v0.2.5
-[0.2.4]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.3...v0.2.4
-[0.2.3]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.2...v0.2.3
-[0.2.2]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/AdGuardSoftwareLimited/ext-translate/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/AdGuardSoftwareLimited/ext-translate/releases/tag/v0.1.0
+[Unreleased]: https://github.com/AdguardTeam/translate/compare/v2.0.7...HEAD
+[2.0.7]: https://github.com/AdguardTeam/translate/compare/v2.0.6...v2.0.7
+[2.0.6]: https://github.com/AdguardTeam/translate/compare/v2.0.1...v2.0.6
+[2.0.1]: https://github.com/AdguardTeam/translate/compare/v1.0.2...v2.0.1
+[1.0.2]: https://github.com/AdguardTeam/translate/compare/v0.3.2...v1.0.2
+[0.3.2]: https://github.com/AdguardTeam/translate/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/AdguardTeam/translate/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/AdguardTeam/translate/compare/v0.2.6...v0.3.0
+[0.2.6]: https://github.com/AdguardTeam/translate/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/AdguardTeam/translate/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/AdguardTeam/translate/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/AdguardTeam/translate/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/AdguardTeam/translate/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/AdguardTeam/translate/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/AdguardTeam/translate/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/AdguardTeam/translate/releases/tag/v0.1.0

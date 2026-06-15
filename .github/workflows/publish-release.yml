@@ -1,6 +1,11 @@
 name: Publish release
 
+description: >-
+  Tags the release commit, builds, tests, publishes to npm,
+  mirrors to the public repo, drafts a GitHub Release, and notifies Slack.
+
 on:
+  # Release PRs are always internal (created by prepare-release.yml).
   pull_request:
     types: [closed]
     branches: [master]
@@ -11,6 +16,8 @@ on:
         required: false
         type: string
 
+# `contents: write` — tag creation (tag job)
+# `id-token: write` — npm Trusted Publishing via OIDC (publish job)
 permissions:
   contents: write
   id-token: write
@@ -32,6 +39,8 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.event.pull_request.merge_commit_sha || github.ref_name }}
 
+      # Version is not kept in source; it is parsed from CHANGELOG
+      # by the tag job and injected here before building.
       - name: Inject version into package.json
         run: npm pkg set version="${{ needs.tag.outputs.version }}"
 
@@ -58,6 +67,8 @@ jobs:
       contents: read
       id-token: write
 
+  # Mirrors the tag to the public repo and creates a GitHub Release there
+  # (with changelog + artifact). Separate from mirror.yml (code sync on push).
   mirror-and-release:
     needs: [tag, publish]
     uses: AdGuardSoftwareLimited/actions/.github/workflows/mirror-and-release.yml@master
