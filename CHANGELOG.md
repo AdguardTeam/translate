@@ -8,10 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2.0.7] - 2026-06-15
+
 ### Fixed
 
 - Missing files in npm package.
-
 
 ## [2.0.6] - 2026-06-04
 
