@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+## [2.0.8] - 2026-06-29
+
 ## [2.0.7] - 2026-06-15
 
 ### Fixed
@@ -157,7 +159,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   output.
 
 
-[Unreleased]: https://github.com/AdguardTeam/translate/compare/v2.0.7...HEAD
+[Unreleased]: https://github.com/AdguardTeam/translate/compare/v2.0.8...HEAD
+[2.0.8]: https://github.com/AdguardTeam/translate/compare/v2.0.7...v2.0.8
 [2.0.7]: https://github.com/AdguardTeam/translate/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/AdguardTeam/translate/compare/v2.0.1...v2.0.6
 [2.0.1]: https://github.com/AdguardTeam/translate/compare/v1.0.2...v2.0.1
