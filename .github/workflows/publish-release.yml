@@ -24,3 +24,7 @@ jobs:
       target_repo: AdguardTeam/translate
       ref: ${{ inputs.ref }}
     secrets: inherit
+    permissions:
+      contents: write
+      id-token: write
+      actions: write
