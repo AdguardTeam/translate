@@ -24,16 +24,6 @@ jobs:
       target_repo: AdguardTeam/translate
       ref: ${{ inputs.ref }}
     secrets: inherit
-    # Permissions required by the nested reusable workflows in ext-shared-actions
-    # → actions/tag-from-changelog.yml and actions/mirror-and-release.yml
-    #   create a Git tag and a GitHub Release in this repo.
-    # → actions/deploy-to-npm.yml and actions/mirror-and-release.yml
-    #   use OIDC trusted publishing to npm.
-    # → actions/mirror-and-release.yml disables/enables workflows in the
-    #   mirror repo.
-    # GitHub Actions forbids nested reusable workflows from escalating
-    # permissions beyond what the top-level caller grants, so we must
-    # declare the full set here.
     permissions:
       contents: write  # create tag & GitHub release (tag-from-changelog, mirror-and-release)
       id-token: write  # OIDC trusted publishing to npm (deploy-to-npm, mirror-and-release)
