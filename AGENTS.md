@@ -30,8 +30,8 @@ has zero runtime dependencies — it is fully self-contained.
 | Category | Detail |
 |---|---|
 | **Language / Version** | TypeScript ~4.1 (strict mode, ES5 target) |
-| **Runtime** | Node.js ≥14 (CI: 22.17); browser consumers |
-| **Package Manager** | Yarn 1.x (classic) |
+| **Runtime** | Node.js ≥22 (CI: 22.22); browser consumers |
+| **Package Manager** | pnpm 10.x (>=10.33.4 <11) |
 | **Build** | Rollup 2.x + Babel 7.x → CJS + ESM + type declarations |
 | **Test** | Jest 29.x (`testEnvironment: "node"`, coverage enabled) |
 | **Linter** | ESLint 7.x (`@typescript-eslint` plugin) |
@@ -83,22 +83,21 @@ has zero runtime dependencies — it is fully self-contained.
 
 | Command | Description |
 |---|---|
-| `yarn build` | Build CJS + ESM + type declarations via Rollup |
-| `yarn test` | Run Jest test suite with coverage |
-| `yarn lint` | Run ESLint on `src/` and `tests/` |
-| `yarn version:current` | Show current version from latest git tag |
-| `yarn docs` | Generate TypeDoc documentation in `docs/` |
+| `pnpm build` | Build CJS + ESM + type declarations via Rollup |
+| `pnpm test` | Run Jest test suite with coverage |
+| `pnpm lint` | Run ESLint on `src/` and `tests/` |
+| `pnpm docs` | Generate TypeDoc documentation in `docs/` |
 
 ## Contribution Instructions
 
 - You MUST verify your changes with the linter and type checker:
 
   ```bash
-  yarn lint
-  yarn build
+  pnpm lint
+  pnpm build
   ```
 
-  `yarn build` also performs type checking via the TypeScript compiler
+  `pnpm build` also performs type checking via the TypeScript compiler
   (Rollup uses the TypeScript plugin). The project has no separate formatter
   or type-check command.
 
@@ -108,7 +107,7 @@ has zero runtime dependencies — it is fully self-contained.
   functionality:
 
   ```bash
-  yarn test
+  pnpm test
   ```
 
 - When making changes to the project structure, ensure the Project Structure
@@ -118,8 +117,19 @@ has zero runtime dependencies — it is fully self-contained.
   `publish-release.yml` stay in sync. The version is derived from git
   tags (not `package.json`).
 
-- Never change `package.json` version manually — it is `0.0.0` in source and
-  injected during CI from the git tag.
+- Never change `package.json` version manually — the source manifest has no
+  version field; CI stamps it before building.
+
+- Use ticket-prefixed commit messages: Commit messages MUST start with the
+  ticket number (`AG-XXX`) so they auto-link with the task tracker, followed
+  by a short description in the present tense (e.g. `AG-57528 Migrate to
+  pnpm`). Automated commits made by CI (e.g. the CHANGELOG finalization in
+  the release PRs) use a [Conventional Commits] prefix such as `docs:`
+  instead.
+
+- Do NOT add a `CHANGELOG.md` `[Unreleased]` entry for changes that only
+  affect CI, tooling, or tests. `[Unreleased]` records user-facing changes
+  only.
 
 - If the prompt essentially asks you to refactor or improve existing code,
   check if you can phrase it as a code guideline. If it is possible, add it
@@ -294,8 +304,10 @@ All dependencies flow downward. There are no circular dependencies.
 ### Dependency Management
 
 - **Pin all dependency versions exactly** — use exact versions, not ranges
-  with `^` or `~`. The current `devDependencies` use caret ranges; prefer
-  exact versions when adding new dependencies.
+  with `^` or `~`. All `devDependencies` in `package.json` are pinned to
+  the exact versions resolved in `pnpm-lock.yaml`. When updating a
+  dependency, run `pnpm install` to keep the lockfile specifiers in sync,
+  and never downgrade a version already resolved in the lockfile.
 - **Prefer vanilla solutions** — this library has zero runtime dependencies
   by design. Use the language's standard library and built-in APIs.
 - **Reputable sources only** — dependencies MUST come from well-established,
@@ -308,12 +320,7 @@ All dependencies flow downward. There are no circular dependencies.
 
 **Rationale**: Fewer, well-vetted dependencies reduce security
 vulnerabilities, supply chain risks, and long-term maintenance costs.
-
-**Known exclusions** (to be fixed):
-
-- `devDependencies` use `^` (caret) version ranges instead of exact
-  versions. These should be pinned to exact versions to ensure reproducible
-  builds.
+Exact version pins guarantee reproducible installs.
 
 ### Configuration & Documentation
 
@@ -334,7 +341,10 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
 ### Releases & CI/CD
 
 - **Version source**: The version is derived from git tags, not
-  `package.json`. The source `package.json` always has `"version": "0.0.0"`.
+  `package.json`. The source `package.json` has no `version` field — the
+  CI `set-dev-version` action stamps a `-dev` version (from the latest
+  `CHANGELOG.md` release heading) into `package.json` before the Docker
+  build, and the real tag version is injected at release time.
 - **Release flow**: The release process follows two steps:
     1. **Create release PR** — Trigger `prepare-release.yml` via
        `workflow_dispatch` with the desired tag (e.g. `v2.0.8`). This
@@ -354,9 +364,16 @@ vulnerabilities, supply chain risks, and long-term maintenance costs.
   package has the correct version.
 - **No manual version bumps**: Never change `package.json` version by hand.
   Use the `Create Release PR` workflow to start a release.
-- **Use `yarn version:current`**: To see the current version from the
-  latest tag, run `yarn version:current` (which runs
-  `git describe --tags --abbrev=0`).
+<!-- markdownlint-disable MD013 -->
+- **Dev version stamping**: CI stamps a next-patch `-dev` version into
+  `package.json` before the Docker build via the shared
+  `set-dev-version` action
+  (`AdGuardSoftwareLimited/ext-shared-actions/.github/actions/set-dev-version@master`).
+  The Dockerfile `build` stage must NOT override that version.
+<!-- markdownlint-enable MD013 -->
+- **Changelog scope**: Do NOT add a `CHANGELOG.md` `[Unreleased]` entry for
+  changes that only affect CI, tooling, or tests. `[Unreleased]` records
+  user-facing changes only.
 - **Changelog format**: `CHANGELOG.md` follows
   [Keep a Changelog](https://keepachangelog.com/) with version headings
   in bracket format (`## [X.Y.Z] - YYYY-MM-DD`). The `[Unreleased]`
@@ -391,3 +408,4 @@ All Markdown files MUST follow these formatting rules:
 **Rationale**: Uniform Markdown formatting improves readability for both
 humans and AI agents that consume project documentation.
 
+[Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/

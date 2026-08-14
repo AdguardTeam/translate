@@ -47,10 +47,10 @@ dependencies.
 npm install @adguard/translate
 ```
 
-Or with Yarn:
+Or with pnpm:
 
 ```bash
-yarn add @adguard/translate
+pnpm add @adguard/translate
 ```
 
 React and Preact are optional peer dependencies — install them only if you

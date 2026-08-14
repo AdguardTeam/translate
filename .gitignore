@@ -1,10 +1,11 @@
-yarn-error.log
 coverage/
 node_modules/
 dist/
 docs/
-.vscode
+.vscode/
 .DS_Store
+
+.pnpm-store/
 
 .npmrc
 *.tgz
@@ -12,3 +13,4 @@ docs/
 # Output directory for CI build
 output/
 
+.sdd/

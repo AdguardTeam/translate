@@ -34,23 +34,30 @@
 <!-- markdownlint-disable MD013 -->
 | Tool | Minimum Version | How to Check |
 |---|---|---|
-| **Node.js** | 14.x (CI uses 22.17) | `node --version` |
-| **Yarn** | 1.x (classic) | `yarn --version` |
+| **Node.js** | >=22 | `node --version` |
+| **pnpm** | 10.x (>=10.33.4 <11) | `pnpm --version` |
 <!-- markdownlint-enable MD013 -->
 
 <!-- markdownlint-disable MD013 -->
-This project uses **Yarn Classic** as its package manager. Yarn 2+ (Berry) is not supported — make sure you are running Yarn 1.x:
+This project uses **pnpm** as its package manager. Make sure you are running
+pnpm 10.x (>=10.33.4 <11):
 <!-- markdownlint-enable MD013 -->
 
 ```bash
-yarn --version
-# Expected output: 1.x.x
+pnpm --version
+# Expected output: 10.x.x
 ```
 
-If you need to install Yarn 1.x:
+If you need to install pnpm (e.g. via Corepack):
 
 ```bash
-npm install -g yarn
+corepack enable
+```
+
+or with npm:
+
+```bash
+npm install -g pnpm@10
 ```
 
 ### Recommended Tools
@@ -72,19 +79,20 @@ cd ext-translate
 ### Install Dependencies
 
 ```bash
-yarn install
+pnpm install
 ```
 
-<!-- markdownlint-disable MD013 -->
-This installs all dev dependencies (TypeScript, Rollup, Jest, ESLint, etc.). There are no runtime dependencies — the library is self-contained.
-<!-- markdownlint-enable MD013 -->
+This installs all dev dependencies (TypeScript, Rollup, Jest, ESLint, etc.).
+There are no runtime dependencies — the library is self-contained.
+Dev dependencies are pinned to exact versions for reproducible installs;
+see [AGENTS.md](./AGENTS.md) "Dependency Management" for the full policy.
 
 ### Verify the Setup
 
 Run the full check suite to confirm everything works:
 
 ```bash
-yarn lint && yarn test && yarn build
+pnpm lint && pnpm test && pnpm build
 ```
 
 All three commands should pass without errors.
@@ -101,15 +109,46 @@ All three commands should pass without errors.
    git checkout -b AG-XXXX-short-description
    ```
 
-2. Make changes and commit using conventional commit messages.
+2. Make changes and commit using ticket-prefixed commit messages (see
+   [Commit Message Convention](#commit-message-convention)).
 
 3. Before pushing, run the full check suite:
 
    ```bash
-   yarn lint && yarn test && yarn build
+   pnpm lint && pnpm test && pnpm build
    ```
 
 4. Push your branch and open a pull request against `master`.
+
+### Commit Message Convention
+
+Every commit message MUST start with the ticket number (`AG-XXX`) so it
+auto-links with the task tracker, followed by a short description in the
+present tense:
+
+```text
+AG-XXX <short description in present tense>
+```
+
+Examples:
+
+- `AG-57528 Migrate package manager to pnpm`
+- `AG-4321 Fix redirect after login`
+- `AG-99 Update dependencies`
+
+Automated commits that CI creates on its own (for example, the CHANGELOG
+finalization in the release PRs, which has no ticket number) use a
+[Conventional Commits] prefix such as `docs:` — e.g.
+`docs: finalize changelog for release`.
+
+### Changelog Scope
+
+Do NOT add a `CHANGELOG.md` `[Unreleased]` entry for changes that only
+affect CI, tooling, or tests. `[Unreleased]` records user-facing changes
+only — any change a consumer would observe (public API, behavior, build
+output, dependencies). A package-manager migration, CI plumbing, or
+internal refactor with no user-visible effect does not get a changelog
+entry.
 
 ### Code Style
 
@@ -123,7 +162,7 @@ The configuration is in `.eslintrc.js`:
 Run the linter:
 
 ```bash
-yarn lint
+pnpm lint
 ```
 
 The linter checks all files in `src/` and `tests/`. There is no auto-fix
@@ -139,7 +178,7 @@ Tests are written with Jest and live in the `tests/` directory.
 Run all tests:
 
 ```bash
-yarn test
+pnpm test
 ```
 
 This also collects code coverage into the `coverage/` directory.
@@ -147,13 +186,13 @@ This also collects code coverage into the `coverage/` directory.
 Run a single test file:
 
 ```bash
-npx jest tests/validator.test.ts
+pnpm exec jest tests/validator.test.ts
 ```
 
 Run tests in watch mode (reruns on file changes):
 
 ```bash
-npx jest --watch
+pnpm exec jest --watch
 ```
 
 Jest configuration is in `jest.config.ts`:
@@ -174,7 +213,7 @@ Jest configuration is in `jest.config.ts`:
 Run the build:
 
 ```bash
-yarn build
+pnpm build
 ```
 
 The build uses Rollup with the following plugins:
@@ -191,7 +230,7 @@ compatibility.
 API documentation is generated with TypeDoc:
 
 ```bash
-yarn docs
+pnpm docs
 ```
 
 Output is written to `docs/`. Open `docs/index.html` in a browser to view it.
@@ -218,16 +257,19 @@ Output is written to `docs/`. Open `docs/index.html` in a browser to view it.
 
 ### Bumping the Version
 
-```bash
-yarn increment
-```
-
 <!-- markdownlint-disable MD013 -->
-This bumps the patch version in `package.json` without creating a git tag. For minor or major version bumps, update `package.json` manually.
+Do not change the `version` in `package.json` — the source manifest has no
+version field. CI stamps a next-patch `-dev` version
+(e.g. `2.0.8` → `2.0.9-dev`) into `package.json` before the Docker build
+using the shared `set-dev-version` action
+(`AdGuardSoftwareLimited/ext-shared-actions/.github/actions/set-dev-version@master`),
+and the real tag version is injected at release time.
 <!-- markdownlint-enable MD013 -->
 
-After bumping, add an entry to `CHANGELOG.md` following the
-[Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+To see the current version, use `git describe --tags --abbrev=0`.
+
+Create a release via the release PR workflow (see AGENTS.md "Releases &
+CI/CD").
 
 ### Running the Full CI Pipeline Locally
 
@@ -246,6 +288,11 @@ DOCKER_BUILDKIT=1 docker build --target build-output --output out .
 ```
 
 The artifact `translate.tgz` will be in the `out/` directory.
+
+Note: `pnpm pack` requires a version in `package.json`. In CI the shared
+`set-dev-version` action stamps the version before the Docker build; to run
+the `build-output` target locally, stamp the version first (e.g.
+`npm pkg set version="0.0.0"`).
 
 ## Project Structure
 
@@ -293,15 +340,15 @@ The artifact `translate.tgz` will be in the `out/` directory.
 
 ### Build Fails with Type Errors
 
-1. Run `yarn lint` first — many type errors are caught by ESLint.
+1. Run `pnpm lint` first — many type errors are caught by ESLint.
 2. Check that you're on a compatible Node.js version:
-   `node --version` (≥14 required).
+   `node --version` (>=22 required).
 3. Clear caches and rebuild:
 
    ```bash
    rm -rf dist node_modules
-   yarn install
-   yarn build
+   pnpm install
+   pnpm build
    ```
 
 ### Tests Fail After Dependency Changes
@@ -309,15 +356,15 @@ The artifact `translate.tgz` will be in the `out/` directory.
 1. Clear Jest's cache:
 
    ```bash
-   npx jest --clearCache
+   pnpm exec jest --clearCache
    ```
 
 2. Reinstall dependencies and retry:
 
    ```bash
    rm -rf node_modules
-   yarn install
-   yarn test
+   pnpm install
+   pnpm test
    ```
 
 ### ESLint Errors
@@ -343,3 +390,5 @@ The artifact `translate.tgz` will be in the `out/` directory.
 - [Semantic Versioning](https://semver.org/spec/v2.0.0.html) — Versioning scheme
 - [Plural Forms Reference](https://github.com/translate/l10n-guide/blob/master/docs/l10n/pluralforms.rst) — Unicode CLDR plural rules
 <!-- markdownlint-enable MD013 -->
+
+[Conventional Commits]: https://www.conventionalcommits.org/en/v1.0.0/
