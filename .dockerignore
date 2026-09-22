@@ -11,7 +11,8 @@ tmp/
 vendor/
 node_modules/
 Dockerfile*
-*.md
+# NOTE: do not exclude *.md here — yarn pack runs inside Docker and the
+# published tarball must include README.md and CHANGELOG.md.
 *.log
 *.tgz
 docs/
