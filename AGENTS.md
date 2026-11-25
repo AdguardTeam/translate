@@ -30,7 +30,7 @@ has zero runtime dependencies — it is fully self-contained.
 | Category | Detail |
 |---|---|
 | **Language / Version** | TypeScript ~4.1 (strict mode, ES5 target) |
-| **Runtime** | Node.js ≥22 (CI: 22.22); browser consumers |
+| **Runtime** | Node.js ≥22.23.5 (CI: 22.23.5); browser consumers |
 | **Package Manager** | pnpm 10.x (>=10.33.4 <11) |
 | **Build** | Rollup 2.x + Babel 7.x → CJS + ESM + type declarations |
 | **Test** | Jest 29.x (`testEnvironment: "node"`, coverage enabled) |

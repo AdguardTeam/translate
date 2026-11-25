@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- [BREAKING CHANGE] The minimum supported Node.js version is 22.23.5.
+
 ### Deprecated
 
 ### Removed

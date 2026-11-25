@@ -34,7 +34,7 @@
 <!-- markdownlint-disable MD013 -->
 | Tool | Minimum Version | How to Check |
 |---|---|---|
-| **Node.js** | >=22 | `node --version` |
+| **Node.js** | >=22.23.5 | `node --version` |
 | **pnpm** | 10.x (>=10.33.4 <11) | `pnpm --version` |
 <!-- markdownlint-enable MD013 -->
 
@@ -342,7 +342,7 @@ the `build-output` target locally, stamp the version first (e.g.
 
 1. Run `pnpm lint` first — many type errors are caught by ESLint.
 2. Check that you're on a compatible Node.js version:
-   `node --version` (>=22 required).
+   `node --version` (>=22.23.5 required).
 3. Clear caches and rebuild:
 
    ```bash
